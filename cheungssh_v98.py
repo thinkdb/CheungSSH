@@ -2,7 +2,7 @@
 #coding:utf8
 #Author=Cheung Kei-Chuen
 #QQ 741345015
-VERSION=96
+VERSION=98
 import os,sys
 BUILD_CMD=['exit','flush logs']
 os.sys.path.insert(0,os.path.abspath('./'))
@@ -81,10 +81,11 @@ def InitInstall():
 Servers=localhost,127.0.0.1,www.baidu.com
 Username=YourServerCount
 Password=Yourcount-Password
+Port=22
 Useroot=N
-#localhost_User=apache
-#localhost_Password=apache-password
-#localhost_Port=222
+#www.baidu.com_Username=apache
+#www.baidu.com_Password=apache-password
+#www.baidu.com_Port=222
 #如果您的每个服务器的账户对应的密码不是都一样，那么您可以使用这个配置
 #Passwordroot=root-password
 #Timeout=10
@@ -93,13 +94,13 @@ UseKey=n
 Deployment=n
 #ListenFile=/var/log/messages
 #ListenTime=60
-#ListenChar=Server startup
-Port=22""")
+#ListenChar=Server startup""")
 		T.close()
 
 
 
 def SSH_cmd(ip,username,password,port,cmd,UseLocalScript,OPTime):
+	PROFILE=". /etc/profile 2&>/dev/null;. ~/.bash_profile 2&>/dev/null;. /etc/bashrc 2&>/dev/null;. ~/.bashrc 2&>/dev/null;"
 	PATH="export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin;"
 	global All_Servers_num,All_Servers_num_all,All_Servers_num_Succ,Done_Status,Global_start_time,PWD
 	start_time=time.time()
@@ -123,9 +124,9 @@ def SSH_cmd(ip,username,password,port,cmd,UseLocalScript,OPTime):
 			ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 			ssh.connect(ip,port,username,password)
 		if Deployment=='y':
-			stdin,stdout,stderr=ssh.exec_command(PWD+PATH+ListenLog+cmd)
+			stdin,stdout,stderr=ssh.exec_command(PROFILE+PWD+PATH+ListenLog+cmd)
 		else:
-			stdin,stdout,stderr=ssh.exec_command(PWD+PATH+cmd)
+			stdin,stdout,stderr=ssh.exec_command(PROFILE+PWD+PATH+cmd)
 		out=stdout.readlines()
 		All_Servers_num += 1
 		print "\r"
@@ -320,7 +321,7 @@ def Upload_file(ip,port,username,password):
 				print "Try use RunMode=D"
 		sftp = paramiko.SFTPClient.from_transport(t)
 		New_d_file=re.sub('//','/',d_file + '/')+ os.path.split(s_file)[1]
-		Bak_File=New_d_file+'.bak'+"%d" % (Global_start_time)
+		Bak_File=New_d_file+'.bak.'+"%d" % (int(time.strftime("%Y%m%d%H%M%S",time.localtime(Global_start_time))))
 		try:
 			sftp.rename(New_d_file,Bak_File)
 			SftpInfo="Warning: %s %s  already exists, and has been backed up to %s \n" % (ip,New_d_file,Bak_File)
@@ -586,13 +587,15 @@ def Excute_cmd_root(s,Port,Username,Password,Passwordroot,cmd,UseLocalScript,OPT
 		bufflog=str(e)
 	if Result_status:
 		Write_Log(s,'NULL',bufflog.strip('\\n') + '\n',cmd,LogFile,'Y',Username,UseLocalScript,'N','N')
-		TmpShow=Format_Char_Show.Show_Char(Show_Result+"Time:"+OPTime,0)
+		#TmpShow=Format_Char_Show.Show_Char(Show_Result+"Time:"+OPTime,0)
+		TmpShow=Format_Char_Show.Show_Char(ResultSum+"Time:"+OPTime,0)
 		WriteSourceLog(TmpShow)
 		print TmpShow
 		#Format_Char_Show.Show_Char(ResultSum+"Time:"+OPTime,0)
 	else:
 		Write_Log(s,bufflog.strip('\\n'),'NULL\n',cmd,LogFile,'Y',Username,UseLocalScript,'N','N')
-		TmpShow=Format_Char_Show.Show_Char(Show_Result+"Time:"+OPTime,0)
+		#TmpShow=Format_Char_Show.Show_Char(Show_Result+"Time:"+OPTime,0)
+		TmpShow=Format_Char_Show.Show_Char(ResultSum+"Time:"+OPTime,0)
 		WriteSourceLog(TmpShow)
 		print TmpShow
 		#Format_Char_Show.Show_Char(ResultSum+"Time:"+OPTime,1)
@@ -660,7 +663,8 @@ def Excute_cmd():
 			continue
 			
 		
-		if not cmd :
+		cmd=re.sub('^ *ll','ls -l',cmd)
+		if re.search("^ *$",cmd):
 			continue
 		Global_start_time=time.time()
 		for s in Servers.split(","):
