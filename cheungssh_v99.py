@@ -2,7 +2,7 @@
 #coding:utf8
 #Author=Cheung Kei-Chuen
 #QQ 741345015
-VERSION=98
+VERSION=99
 import os,sys
 BUILD_CMD=['exit','flush logs']
 os.sys.path.insert(0,os.path.abspath('./'))
@@ -666,6 +666,12 @@ def Excute_cmd():
 		cmd=re.sub('^ *ll','ls -l',cmd)
 		if re.search("^ *$",cmd):
 			continue
+		if re.search("^ *vi",cmd):
+			print "抱歉，当前不支持交互式"
+			continue
+		cmd=re.sub("^ *top","top  -b -d 1 -n 1",cmd)
+		cmd=re.sub("^ *ping","ping  -c 4",cmd)
+			
 		Global_start_time=time.time()
 		for s in Servers.split(","):
 			
