@@ -2,7 +2,7 @@
 #coding:utf8
 #Author=Cheung Kei-Chuen
 #QQ 741345015
-VERSION=99
+VERSION=106
 import os,sys
 BUILD_CMD=['exit','flush logs']
 os.sys.path.insert(0,os.path.abspath('./'))
@@ -29,16 +29,18 @@ if int(T_V.replace(".","")) <240:
 	sys.exit(1)
 
 
-def Write_Log(ip,stderr,stdout,Logcmd,LogFile,useroot,username,UseLocalScript,Deployment,DeploymentStatus):
+def Write_Log(ip,stderr,stdout,Logcmd,LogFile,useroot,username,UseLocalScript,Deployment,DeploymentStatus,OPTime):
 	if DeploymentStatus:
 		DeploymentStatus='Y'
 	else:
 		DeploymentStatus='N'
+	if UseKey=="Y":
+		username=getpass.getuser()
 	Deployment=Deployment.upper()
 	
 	try:
 		T=open(LogFile,"a")
-		T.write(ip+ '===' + username  + '===' + time.strftime('%Y%m%d%H%M%S',time.localtime())   + '===' + useroot + '===' + UseLocalScript + '===' + Deployment + '===' + DeploymentStatus + '===' + Logcmd + '===' + stderr + '===' + stdout)
+		T.write(ip+ '===' + "用户名:" +username  + '===' + "时间:"+OPTime   + '===' + "是否使用su-root:"+useroot + '===' + "是否使用脚本:" + UseLocalScript + '===' + "是否使用部署模式:"+Deployment + '===' +"部署完成状态"+ DeploymentStatus + '===' + "命令:"+Logcmd + '===' +"错误显示:"+ stderr + '===' +"正确显示:"+ stdout)
 		T.close()
 	except Exception,e:
 		print "Warning: Can't write log. (%s)" % e
@@ -49,11 +51,10 @@ def WriteSourceLog(MSG):
 		F.close()
 	except Exception,e:
 		print "Can not write to log (%s)" % (e)
-	
 def LocalScriptUpload(ip,port,username,password,s_file,d_file):
 	try:		
 		t = paramiko.Transport((ip,port))
-                if UseKey=='y':
+                if UseKey=='Y':
                         KeyPath=os.path.expanduser('~/.ssh/id_rsa')
                         key=paramiko.RSAKey.from_private_key_file(KeyPath)
 			t.connect(username = username,pkey=key)
@@ -67,34 +68,55 @@ def LocalScriptUpload(ip,port,username,password,s_file,d_file):
 	else:
 		t.close()
 def InitInstall():
-	if not os.path.isdir("/cheung"):
-		if getpass.getuser()=="root":
-			os.system("mkdir -p /cheung/logs /cheung/.db/.key  /cheung/conf /cheung/bin")
-		else:
-			print "Sorry Must be as root install !"
-			sys.exit(1)
+	if getpass.getuser()=="root":
+		os.system("mkdir -p /cheung/logs /cheung/flag  /cheung/conf /cheung/bin /cheung/version")
+	else:
+		print "Sorry Must be as root install !"
+		sys.exit(1)
 	if not os.path.isfile('/cheung/conf/cheung.conf'):
 		T=open('/cheung/conf/cheung.conf','w')
 		T.write("""[CheungSSH]
 #Author=Cheung Kei-Chuen
 #QQ=741345015
-Servers=localhost,127.0.0.1,www.baidu.com
-Username=YourServerCount
-Password=Yourcount-Password
-Port=22
 Useroot=N
-#www.baidu.com_Username=apache
-#www.baidu.com_Password=apache-password
-#www.baidu.com_Port=222
-#如果您的每个服务器的账户对应的密码不是都一样，那么您可以使用这个配置
-#Passwordroot=root-password
-#Timeout=10
 RunMode=M
-UseKey=n
-Deployment=n
+#请在/cheung/cong/hosts中指定主机信息
+#Timeout=3
+#UseKey=N
+#Deployment=N
 #ListenFile=/var/log/messages
 #ListenTime=60
 #ListenChar=Server startup""")
+		T.close()
+	try:
+		VerR=int(open("/cheung/version/version").read().strip())
+	except Exception,e:
+		VerR=0
+	if VerR<104:
+		os.system("""echo %s >/cheung/version/version"""%(VERSION))
+		T=open('/cheung/conf/cheung.conf','w')
+		T.write("""[CheungSSH]
+#Author=Cheung Kei-Chuen
+#QQ=741345015
+Useroot=N
+RunMode=M
+#请在/cheung/cong/hosts中指定主机信息
+#Timeout=3
+#UseKey=N
+#Deployment=N
+#ListenFile=/var/log/messages
+#ListenTime=60
+#ListenChar=Server startup""")
+		T.close()
+		print "\033[1;33m您使用了新版本，相比之前的老版本在配置上会有所变化，请重新对\n/cheung/conf/cheung.conf\n/cheung/conf/hosts进行配置\a\033[0m"
+	if not os.path.isfile('/cheung/conf/hosts'):
+		T=open('/cheung/conf/cheung.conf','w')
+		T.write("""主机地址===端口===登陆账户===登陆密码===su-root密码
+#如果您担心安全问题，在密码列位置，您可以使用...===None===...表示不在配置文件中指定，而是在您执行命令的时候系统会询问您密码。比如以下配置:
+#127.0.0.1===222===root===None===None
+#locallhost===22===root===MyPassword===su-root的密码,如果没有使用Useroot，此列也可以填写None
+#None的特殊指定只能针对密码特别指定，不能在账户名，或者是端口，主机这三列中使用
+#注意:在每一个配置中，请不要有空格或者是制表符!""")
 		T.close()
 
 
@@ -102,17 +124,18 @@ Deployment=n
 def SSH_cmd(ip,username,password,port,cmd,UseLocalScript,OPTime):
 	PROFILE=". /etc/profile 2&>/dev/null;. ~/.bash_profile 2&>/dev/null;. /etc/bashrc 2&>/dev/null;. ~/.bashrc 2&>/dev/null;"
 	PATH="export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin;"
-	global All_Servers_num,All_Servers_num_all,All_Servers_num_Succ,Done_Status,Global_start_time,PWD
+	global All_Servers_num,All_Servers_num_all,All_Servers_num_Succ,Done_Status,Global_start_time,PWD,FailIP
 	start_time=time.time()
 	ResultSum=''
 	ResultSumLog=''
 	DeploymentStatus=False
 	DeploymentInfo=None
+	PWD=re.sub("/{2,}","/",PWD)
 	try:
 		o=None
 		err=None
 		ssh=paramiko.SSHClient()
-		if UseKey=='y':
+		if UseKey=='Y':
 	
 			KeyPath=os.path.expanduser('~/.ssh/id_rsa')
 			###
@@ -123,7 +146,7 @@ def SSH_cmd(ip,username,password,port,cmd,UseLocalScript,OPTime):
 		else:
 			ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 			ssh.connect(ip,port,username,password)
-		if Deployment=='y':
+		if Deployment=='Y':
 			stdin,stdout,stderr=ssh.exec_command(PROFILE+PWD+PATH+ListenLog+cmd)
 		else:
 			stdin,stdout,stderr=ssh.exec_command(PROFILE+PWD+PATH+cmd)
@@ -139,16 +162,17 @@ def SSH_cmd(ip,username,password,port,cmd,UseLocalScript,OPTime):
 			ResultSum +=err
 			ResultSumLog +=err.strip('\n') + '\\n'
 		if err:
+			FailIP.append(ip)
 			ResultSum_count="\033[1m\033[1;32m+OK %s (%0.2f Sec, All %d Done %d \033[1m\033[1;31mCmd:Failed\033[1m\033[1;32m)\033[1m\033[0m" % (ip,float(time.time()-start_time),All_Servers_num_all,All_Servers_num)
 			out='Null\n'
-			if Deployment=='y':
+			if Deployment=='Y':
 				DeploymentStatus=False
-			Write_Log(ip,ResultSumLog.strip('\\n'),out,cmd,LogFile,'N',username,UseLocalScript,Deployment,DeploymentStatus)
+			Write_Log(ip,ResultSumLog.strip('\\n'),out,cmd,LogFile,'N',username,UseLocalScript,Deployment,DeploymentStatus,OPTime)
 		else:
 			error_out='NULL'
 			ResultSum_count="\033[1m\033[1;32m+OK %s (%0.2f Sec, All %d Done %d  Cmd:Sucess)\033[1m\033[0m" % (ip,float(time.time()-start_time),All_Servers_num_all,All_Servers_num)
 			All_Servers_num_Succ+=1
-			if Deployment=='y':
+			if Deployment=='Y':
 				print  "Wating %s deployment (for %d Sec)..." % (ip,ListenTime)
 				T=LogCollect.LogCollect(ip,port,username,password,"""grep  -E "%s"  %s -q && echo  -n 'DoneSucc'""" % (ListenChar,DeploymentFlag),ListenTime,UseKey)
 				if T:
@@ -158,13 +182,14 @@ def SSH_cmd(ip,username,password,port,cmd,UseLocalScript,OPTime):
 					DeploymentStatus=False
 					
 
-			Write_Log(ip,error_out,ResultSumLog.strip('\\n') + '\n',cmd,LogFile,'N',username,UseLocalScript,Deployment,DeploymentStatus)
+			Write_Log(ip,error_out,ResultSumLog.strip('\\n') + '\n',cmd,LogFile,'N',username,UseLocalScript,Deployment,DeploymentStatus,OPTime)
 
 		Show_Result=ResultSum + '\n' +ResultSum_count
 		TmpShow=Format_Char_Show.Show_Char(Show_Result+"Time:"+OPTime,0)  
 		WriteSourceLog(TmpShow)
 		print TmpShow
 	except Exception,e:
+		FailIP.append(ip)
 		All_Servers_num += 1
 		ResultSum_count="\n\033[1m\033[1;31m-ERR %s %s (%0.2f Sec All %d Done %d)\033[1m\033[0m\a"	% (ip,e,float(time.time() - start_time),All_Servers_num_all,All_Servers_num)
 		Show_Result= ResultSum+ResultSum_count
@@ -173,10 +198,10 @@ def SSH_cmd(ip,username,password,port,cmd,UseLocalScript,OPTime):
                 WriteSourceLog(TmpShow)
                 print TmpShow
 		#Format_Char_Show.Show_Char(Show_Result+"Time:"+OPTime,1)  
-		Write_Log(ip,str(e),'NULL\n',cmd,LogFile,'N',username,UseLocalScript,Deployment,DeploymentStatus)
+		Write_Log(ip,str(e),'NULL\n',cmd,LogFile,'N',username,UseLocalScript,Deployment,DeploymentStatus,OPTime)
 	else:
 		ssh.close()
-	if Deployment=='y' and not  DeploymentStatus:
+	if Deployment=='Y' and not  DeploymentStatus:
 		while True:
 			TT=raw_input("%s Deployment not Success (%s) want contiue deployment next server (yes/no) ? " %(ip,DeploymentInfo))
 			if TT=='yes':
@@ -184,56 +209,37 @@ def SSH_cmd(ip,username,password,port,cmd,UseLocalScript,OPTime):
 			elif TT=='no':
 				sys.exit(1)
 	if All_Servers_num == All_Servers_num_all: #这里防止计数器永远相加下去
-		print "+Done (Succ:%d,Fail:%d, %0.2fSec GUN/Linux Cheung Kei-Chuen All Right Reserved)" % (All_Servers_num_Succ,All_Servers_num_all-All_Servers_num_Succ,time.time()-Global_start_time)
+		FailNum=All_Servers_num_all-All_Servers_num_Succ
+		if FailNum>0:
+			FailNumShow="\033[1m\033[1;31mFail:%d\033[1m\033[0m" % (FailNum)
+		else:
+			FailNumShow="Fail:%d" % (FailNum)
+		print "+Done (Succ:%d,%s, %0.2fSec GUN/Linux Cheung Kei-Chuen All Right Reserved)" % (All_Servers_num_Succ,FailNumShow,time.time()-Global_start_time)
 		All_Servers_num =0
 		All_Servers_num_Succ=0
 		Done_Status='end'
 
 def Read_config(file="/cheung/conf/cheung.conf"):
-	global Username,Password,Servers,Port,PsswordType,Useroot,Passwordroot,All_pass,All_user,All_port,Timeout,RunMode,UseKey,Deployment,ListenTime,ListenFile,ListenChar
+	global Servers,Useroot,Timeout,RunMode,UseKey,Deployment,ListenTime,ListenFile,ListenChar,ServersPort,ServersPassword,ServersUsername,ServersRootPassword,NoPassword,NoRootPassword
+	ServersPort={};ServersPassword={};ServersUsername={};ServersRootPassword={};Servers=[]
 	c=ConfigParser.ConfigParser()
 	try:
 		c.read(file)
 	except ConfigParser.ParsingError,e:
-		print "The %s format Error.\a\n\t%s" % (file,e)
+		print "文件%s格式错误.\a\n\t" % (file)
 		sys.exit(1)
-	try:
-		Servers=c.get("CheungSSH","Servers")
 	except Exception,e:
-		print "No Servers"
-		sys.exit()
-	try:
-		UseKey=c.get("CheungSSH","UseKey").lower()
-	except Exception,e:
-		UseKey='n'
+		print e
+		sys.exit(1)
 	
-	if UseKey=='n':
-		try:
-			Password=c.get("CheungSSH","Password")
-		except Exception,e:
-			print "No Password"
-			sys.exit()
-		try:
-			Username=c.get("CheungSSH","Username")
-		except Exception,e:
-			print "No Username"
-			sys.exit()
-	else:
-		Password=None
-		Username=getpass.getuser()
-	try:
-		Port=int(c.get("CheungSSH","Port"))
-	except Exception,e:
-		Port=22
-		print "No Port default 22"
 	try:
 		RunMode=c.get("CheungSSH","RunMode").upper()
 	except Exception,e:
 		RunMode='M'
 		print "No Runmode default Mutiple(M)"
 	try:
-		Deployment=c.get("CheungSSH","Deployment").lower()
-		if Deployment=='y':
+		Deployment=c.get("CheungSSH","Deployment").upper()
+		if Deployment=='Y':
 			try:
 				ListenFile=c.get("CheungSSH","ListenFile")
 			except Exception,e:
@@ -250,55 +256,83 @@ def Read_config(file="/cheung/conf/cheung.conf"):
 				print "In deployment mode ,must be specify ListenChar"
 				sys.exit(1)
 	except Exception,e:
-		Deployment='n'
-	if RunMode=='M' and Deployment=='y':
+		Deployment='N'
+	if RunMode=='M' and Deployment=='Y':
 		print "In Mutiple-threading mode,do not support deployment mode!"
 		sys.exit(1)
 			
 		
 	try:
-		Useroot=c.get("CheungSSH","Useroot").lower()
-		if Useroot=='y' and Deployment=='y':
+		Useroot=c.get("CheungSSH","Useroot").upper()
+		if Useroot=='Y' and Deployment=='Y':
 			print "In Deployment no support su  - root "
 			sys.exit(1)
 	except Exception,e:
-		Useroot="n"
+		Useroot="N"
+	try:
+		UseKey=c.get("CheungSSH","UseKey").upper()
+	except:
+		UseKey="N"
+	try:
+		HostsFile="/cheung/conf/hosts"
+		T=open(HostsFile)
+		NoPassword=False
+		for b in T:
+			if re.search("^#",b):
+				continue
+			a=b.strip().split("===")
+			if len(a)!=5:
+				print """您的配置文件中没有足够的列:\033[1m\033[1;31m[%s]\033[1m\033[0m\a
+请使用如下格式:
+主机地址===端口号===登陆账户===登陆密码===su-root密码，如果没有配置使用su-root，此列可为None""" % b.strip()
+				sys.exit()
+			ServersPort[a[0]]=int(a[1])
+			Servers.append(a[0])
+			if UseKey.upper()=="N":
+				ServersUsername[a[0]]=a[2]
+				TP=re.search("^[Nn][Oo][Nn][Ee]$",a[3])
+				if TP:
+					if not NoPassword:
+						print "注意:\033[1;33m\n\t您在[%s]使用了None指定密码，程序将不会读取配置文件中的密码,而是需要您手动指定一个密码用于全部主机,如果这不是您需要的，请重新为每一个主机指定密码!\033[0m"%a[0]
+						NoPassword=True
+				else:
+					ServersPassword[a[0]]=a[3]
+						
+			else:
+				ServersUsername[a[0]]=getpass.getuser()
+			NoRootPassword=False
+			if Useroot.upper()=="Y":
+				try:
+					TK=re.search("^[Nn][Oo][Nn][Ee]$",a[4])
+					if TK:
+						if not NoRootPassword:
+							NoRootPassword=True
+					else:
+						ServersRootPassword[a[0]]=a[-1]
+				except Exception,e:
+					print """您使用了su - root ，但未指定su - root的密码
+%s===端口===账户名===密码===root的密码""" % (a[0])
+					print e
+					sys.exit()
+		T.close()
+	except IndexError:
+		print """您的主机文件中，没有足够的配置，正确的应该是:
+主机===端口===账户名===密码"""
+		sys.exit()
+	except Exception,e:
+		print "读取配置错误 %s (%s) "%(e,HostsFile)
+		sys.exit(1)
 	try:
 		Timeout=c.get("CheungSSH","Timeout")
 		try:
 			Timeout=socket.setdefaulttimeout(int(Timeout))
 		except Exception,e:
-			Timeout=10
-			print "Warning: Timeout's Value Error, default=10 (Sec)"
+			Timeout=3
+			print "Warning: Timeout's Value Error, default=3 (Sec)"
 	except Exception,e:
 		Timeout=socket.setdefaulttimeout(10)
 
-	if Useroot == "y":
-		try:
-			Passwordroot=c.get("CheungSSH","Passwordroot")
-		except Exception,e:
-			print "Need root's Password"
-			sys.exit(1)
-	All_pass={}
-	All_user={}
-	All_port={}
-	for t_server in Servers.split(","):
-		try:
-			t=c.get("CheungSSH","%s_Password" % (t_server))
-			All_pass["%s_Password" % (t_server)]=t
-		except Exception,e:
-			pass
-		try:
-			t=c.get("CheungSSH","%s_Username" % (t_server))
-			All_user["%s_Username" % (t_server)]=t
-		except:
-			pass
-		try:
-			t=c.get("CheungSSH","%s_Port" % (t_server))
-			All_port["%s_Port" % (t_server)]=int(t)
-		except:
-			pass
-	print "Servers:%d|RunMode:%s|UseKey:%s|Deployment:%s|Username:%s  \n" % (len(Servers.split(',')),RunMode,UseKey,Deployment,Username)
+	print "Servers:%d|RunMode:%s|Deployment:%s|UseKey:%s|CurUser:%s|Useroot:%s  \n" % (len(ServersPort),RunMode,Deployment,UseKey,getpass.getuser(),Useroot)
 
 
 def Upload_file(ip,port,username,password):
@@ -306,7 +340,7 @@ def Upload_file(ip,port,username,password):
 	global All_Servers_num,All_Servers_num_all,All_Servers_num_Succ,Global_start_time
 	try:
 		t = paramiko.Transport((ip,port))
-		if UseKey=='y':
+		if UseKey=='Y':
                         KeyPath=os.path.expanduser('~/.ssh/id_rsa')
                         key=paramiko.RSAKey.from_private_key_file(KeyPath)
 			try:
@@ -324,7 +358,7 @@ def Upload_file(ip,port,username,password):
 		Bak_File=New_d_file+'.bak.'+"%d" % (int(time.strftime("%Y%m%d%H%M%S",time.localtime(Global_start_time))))
 		try:
 			sftp.rename(New_d_file,Bak_File)
-			SftpInfo="Warning: %s %s  already exists, and has been backed up to %s \n" % (ip,New_d_file,Bak_File)
+			SftpInfo="Warning: %s %s  already exists,backed up to %s \n" % (ip,New_d_file,Bak_File)
 		except Exception,e:
 			SftpInfo='\n'
 		ret=sftp.put(s_file,New_d_file)
@@ -338,7 +372,13 @@ def Upload_file(ip,port,username,password):
 		t.close()
 
 	if All_Servers_num_all == All_Servers_num:
-		print "+Done (Succ:%d,Fail:%d, %0.2fSec GUN/Linux Cheung Kei-Chuen All Right Reserved)" % (All_Servers_num_Succ,All_Servers_num_all-All_Servers_num_Succ,time.time()-Global_start_time)
+		FailNum=All_Servers_num_all-All_Servers_num_Succ
+		if FailNum>0:
+			FailNumShow="\033[1m\033[1;31mFail:%d\033[1m\033[0m" % (FailNum)
+		else:
+			FailNumShow="Fail:%d" % (FailNum)
+		
+		print "+Done (Succ:%d,%s, %0.2fSec GUN/Linux Cheung Kei-Chuen All Right Reserved)" % (All_Servers_num_Succ,FailNumShow,time.time()-Global_start_time)
 		All_Servers_num =0
 		All_Servers_num_Succ=0
 
@@ -348,7 +388,7 @@ def Download_file_regex(ip,port,username,password):
 	start_time=time.time()
 	try:
 		t = paramiko.Transport((ip,port))
-                if UseKey=='y':
+                if UseKey=='Y':
                         KeyPath=os.path.expanduser('~/.ssh/id_rsa')
                         key=paramiko.RSAKey.from_private_key_file(KeyPath)
 			t.connect(username = username,pkey=key)
@@ -374,7 +414,12 @@ def Download_file_regex(ip,port,username,password):
 		t.close()
 	if All_Servers_num_all == All_Servers_num:
 		All_Servers_num = 0
-		print "+Done (Succ:%d,Fail:%d, %0.2fSec GUN/Linux Cheung Kei-Chuen All Right Reserved)" % (All_Servers_num_Succ,All_Servers_num_all-All_Servers_num_Succ,time.time()-Global_start_time)
+		FailNum=All_Servers_num_all-All_Servers_num_Succ
+		if FailNum>0:
+			FailNumShow="\033[1m\033[1;31mFail:%d\033[1m\033[0m" % (FailNum)
+		else:
+			FailNumShow="Fail:%d" % (FailNum)
+		print "+Done (Succ:%d,%s, %0.2fSec GUN/Linux Cheung Kei-Chuen All Right Reserved)" % (All_Servers_num_Succ,FailNumShow,time.time()-Global_start_time)
 		
 
 def Download_file(ip,port,username,password):
@@ -382,7 +427,7 @@ def Download_file(ip,port,username,password):
 	start_time=time.time()
 	try:
 		t = paramiko.Transport((ip,port))
-                if UseKey=='y':
+                if UseKey=='Y':
                         KeyPath=os.path.expanduser('~/.ssh/id_rsa')
                         key=paramiko.RSAKey.from_private_key_file(KeyPath)
 			t.connect(username = username,pkey=key)
@@ -401,17 +446,22 @@ def Download_file(ip,port,username,password):
 		t.close()
 	if All_Servers_num_all == All_Servers_num:
 		All_Servers_num = 0
-		print "+Done (Succ:%d,Fail:%d, %0.2fSec GUN/Linux Cheung Kei-Chuen All Right Reserved)" % (All_Servers_num_Succ,All_Servers_num_all-All_Servers_num_Succ,time.time()-Global_start_time)
+		FailNum=All_Servers_num_all-All_Servers_num_Succ
+		if FailNum>0:
+			FailNumShow="\033[1m\033[1;31mFail:%d\033[1m\033[0m" % (FailNum)
+		else:
+			FailNumShow="Fail:%d" % (FailNum)	
+		print "+Done (Succ:%d,%s, %0.2fSec GUN/Linux Cheung Kei-Chuen All Right Reserved)" % (All_Servers_num_Succ,FailNumShow,time.time()-Global_start_time)
 
 
 
 
 
 	
-def Main_p(Server,Port,Username,Password):
-	global s_file,d_file,All_Servers_num_Succ,LocalScript,Global_start_time
+def Main_p():
+	global s_file,d_file,All_Servers_num_Succ,LocalScript,Global_start_time,NoPassword,NoRootPassword
 	global All_Servers_num_all,All_Servers_num
-	All_Servers_num_all=len(Servers.split(','))
+	#All_Servers_num_all=len(Servers.split(','))
 	All_Servers_num    =0
 	All_Servers_num_Succ=0
 	try:
@@ -436,18 +486,32 @@ def Main_p(Server,Port,Username,Password):
 			%s  -t download -s '^/remote/tomcat/logs/localhost_2015-0[1-3].*log$' -d  /local/dir/
 
 			Notice: This parameter applies only to download""" % sys.argv[0])
-		p.add_option("-f","--File",action='store_false',default=True,help="""Use LocalScript File""")
 		(option,args)=p.parse_args()
-		if option.File :
-			LocalScript='n'
-			#print 'no use'
-		else:
-			LocalScript='y'
-			#print 'use'
-			
+
+
+		if NoPassword:
+			SetPassword=getpass.getpass("请在此处为所有主机指定密码(请确保该密码适用用于所有的服务器，否则请在配置文件/cheung/conf/hosts文件中逐个指定)\n\033[1;33mHosts Password:\033[0m  ")
+			if SetPassword:
+				print "已为所有主机指定密码"
+			else:
+				print "您尚未指定密码，程序退出"
+				sys.exit()
+			for a in Servers:
+				ServersPassword[a]=SetPassword
+			NoPassword=False
+		if NoRootPassword:
+			SetRootPassword=getpass.getpass("请指定su-root的密码: ")
+			if SetRootPassword:
+				print  "已指定su - root密码"
+				NoRootPassword=False
+			else:
+				print "您尚未指定su - root的密码,程序退出"
+				sys.exit()
+
 		if option.excute_type == "cmd":
 			Excute_cmd()
 		elif option.excute_type == "upload":
+			All_Servers_num_all=len(Servers)
 			if option.source_file and option.destination_file:
 				s_file=option.source_file
 				d_file=option.destination_file
@@ -456,25 +520,20 @@ def Main_p(Server,Port,Username,Password):
 				s_file=raw_input("Local Source Path>>>")
 				d_file=raw_input("Remote Destination Full-Path>>>")
 			Global_start_time=time.time()
-			for s in Servers.split(","):
-				try:
-						t_password=All_pass["%s_Password" % (s)]
-				except:
-						t_password=Password
-				try:
-						t_username=All_user["%s_Username" % (s)]
-				except:
-						t_username=Username
-				try:
-						t_port=All_port["%s_Port" % (s)]
-				except:
-						t_port=Port
+			for s in Servers:
 				if RunMode.upper()=='M':
-					a=threading.Thread(target=Upload_file,args=(s,t_port,t_username,t_password))
+					if UseKey=="Y":
+						a=threading.Thread(target=Upload_file,args=(s,ServersPort[s],ServersUsername[s],None))
+					else:
+						a=threading.Thread(target=Upload_file,args=(s,ServersPort[s],ServersUsername[s],ServersPassword[s]))
 					a.start()
 				else:
-					Upload_file(s,t_port,t_username,t_password)
+					if UseKey=="Y":
+						Upload_file(s,ServersPort[s],ServersUsername[s],None)
+					else:
+						Upload_file(s,ServersPort[s],ServersUsername[s],ServersPassword[s])
 		elif option.excute_type == "download":
+			All_Servers_num_all=len(Servers)
 			if option.source_file and option.destination_file:
 				s_file=option.source_file
 				d_file=option.destination_file
@@ -486,25 +545,18 @@ def Main_p(Server,Port,Username,Password):
 				print 'Recv location must be a directory'
 				sys.exit(1)
 			Global_start_time=time.time()
-			for s in Servers.split(","):
-				
-				try:
-					t_password=All_pass["%s_Password" % (s)]
-				except:
-					t_password=Password
-				try:
-					t_username=All_user["%s_Username" % (s)]
-				except:
-					t_username=Username
-				try:
-					t_port=All_port["%s_Port" % (s)]
-				except:
-					t_port=Port
-
+			for s in Servers:
 				if option.regex:
-					a=threading.Thread(target=Download_file,args=(s,t_port,t_username,t_password))
+					if UseKey=="Y":
+						a=threading.Thread(target=Download_file,args=(s,ServersPort[s],ServersUsername[s],None))
+					else:
+						a=threading.Thread(target=Download_file,args=(s,ServersPort[s],ServersUsername[s],ServersPassword[s]))
 				else:
-					a=threading.Thread(target=Download_file_regex,args=(s,t_port,t_username,t_password))
+					if UseKey=="Y":
+						a=threading.Thread(target=Download_file_regex,args=(s,ServersPort[s],ServersUsername[s],None))
+					else:
+						a=threading.Thread(target=Download_file_regex,args=(s,ServersPort[s],ServersUsername[s],ServersPassword[s]))
+						
 				a.start()
 		elif not option.excute_type:
 			Excute_cmd()
@@ -518,7 +570,7 @@ def Main_p(Server,Port,Username,Password):
 		print "exit"
 
 def Excute_cmd_root(s,Port,Username,Password,Passwordroot,cmd,UseLocalScript,OPTime):
-	global All_Servers_num_all,All_Servers_num,All_Servers_num_Succ,Done_Status,bufflog
+	global All_Servers_num_all,All_Servers_num,All_Servers_num_Succ,Done_Status,bufflog,FailIP
 	Done_Status='start'
 	bufflog=''
 	start_time=time.time()
@@ -526,7 +578,7 @@ def Excute_cmd_root(s,Port,Username,Password,Passwordroot,cmd,UseLocalScript,OPT
 	Result_status=False
 	try:
 		t=paramiko.SSHClient()
-                if UseKey=='y':
+                if UseKey=='Y':
 			KeyPath=os.path.expanduser('~/.ssh/id_rsa')
                         key=paramiko.RSAKey.from_private_key_file(KeyPath)
                         t.load_system_host_keys()
@@ -543,7 +595,6 @@ def Excute_cmd_root(s,Port,Username,Password,Passwordroot,cmd,UseLocalScript,OPT
 		while not re.search("Password:",buff) and not re.search("：", buff):
 			resp=ssh.recv(9999)
 			buff += resp
-		#print buff #show su result
 		ssh.send("%s\n" % (Passwordroot))
 		buff1=''
 		while True:
@@ -578,75 +629,157 @@ def Excute_cmd_root(s,Port,Username,Password,Passwordroot,cmd,UseLocalScript,OPT
 			bufflog=bufflog_new
 		else:
 			All_Servers_num += 1
+			FailIP.append(ip)
 			ResultSum=buff + "\n\033[1m\033[1;31m-ERR Su Failed %s (%0.2f Sec All %d Done %d)\033[1m\033[0m\n" % (s,float(time.time() - start_time),All_Servers_num_all,All_Servers_num)
 			
 	except Exception,e:
 		All_Servers_num += 1
 		Result_status=False
+		FailIP.append(ip)
 		ResultSum="\n\033[1m\033[1;31m-ERR %s %s (%0.2f Sec All %d Done %d)\033[1m\033[0m\a"   % (e,s,float(time.time() - start_time),All_Servers_num_all,All_Servers_num)
 		bufflog=str(e)
 	if Result_status:
-		Write_Log(s,'NULL',bufflog.strip('\\n') + '\n',cmd,LogFile,'Y',Username,UseLocalScript,'N','N')
+		Write_Log(s,'NULL',bufflog.strip('\\n') + '\n',cmd,LogFile,'Y',Username,UseLocalScript,'N','N',OPTime)
 		#TmpShow=Format_Char_Show.Show_Char(Show_Result+"Time:"+OPTime,0)
 		TmpShow=Format_Char_Show.Show_Char(ResultSum+"Time:"+OPTime,0)
 		WriteSourceLog(TmpShow)
 		print TmpShow
 		#Format_Char_Show.Show_Char(ResultSum+"Time:"+OPTime,0)
 	else:
-		Write_Log(s,bufflog.strip('\\n'),'NULL\n',cmd,LogFile,'Y',Username,UseLocalScript,'N','N')
+		Write_Log(s,bufflog.strip('\\n'),'NULL\n',cmd,LogFile,'Y',Username,UseLocalScript,'N','N',OPTime)
 		#TmpShow=Format_Char_Show.Show_Char(Show_Result+"Time:"+OPTime,0)
 		TmpShow=Format_Char_Show.Show_Char(ResultSum+"Time:"+OPTime,0)
 		WriteSourceLog(TmpShow)
 		print TmpShow
 		#Format_Char_Show.Show_Char(ResultSum+"Time:"+OPTime,1)
 	if All_Servers_num_all == All_Servers_num:
-		print "+Done (Succ:%d,Fail:%d, %0.2fSec GUN/Linux Cheung Kei-Chuen All Right Reserved)" % (All_Servers_num_Succ,All_Servers_num_all-All_Servers_num_Succ,time.time()-Global_start_time)
+		FailNum=All_Servers_num_all-All_Servers_num_Succ
+		if FailNum>0:
+			FailNumShow="\033[1m\033[1;31mFail:%d\033[1m\033[0m" % (FailNum)
+		else:
+			FailNumShow="Fail:%d" % (FailNum)
+		print "+Done (Succ:%d,%s, %0.2fSec GUN/Linux Cheung Kei-Chuen All Right Reserved)" % (All_Servers_num_Succ,FailNumShow,time.time()-Global_start_time)
                 All_Servers_num =0
                 All_Servers_num_Succ=0
 		Done_Status='end'
 
 def Excute_cmd():
-	global All_Servers_num_all,All_Servers_num,All_Servers_num_Succ,Done_Status,Logcmd,ListenLog,Global_start_time,PWD
+	global All_Servers_num_all,All_Servers_num,All_Servers_num_Succ,Done_Status,Logcmd,ListenLog,Global_start_time,PWD,FailIP,ScriptFilePath
 	Done_Status='end'
-	All_Servers_num_all=len(Servers.split(','))
 	All_Servers_num    =0
 	All_Servers_num_Succ=0
 	UseLocalScript='N' #
-	PWD=''
+	PWD='~'
 	IS_PWD=False
+	UseSystem=False
+	Servers_T=Servers
+	FailIP=[];LastCMD=[]
+	if Useroot=="Y":
+		CmdPrompt="CheungSSH root"
+	else:
+		CmdPrompt="CheungSSH"
 	while True:
+		All_Servers_num_all=len(Servers_T)
 		OPTime=time.strftime('%Y%m%d%H%M%S',time.localtime())
+			
 		if Done_Status=='end':
-			if Useroot == "y":
-				cmd=raw_input("CheungSSH root>>>>")
-			else:
-				cmd=raw_input("CheungSSH>>>>")
-				
+			try:
+				if IS_PWD:
+					ShowPWD=re.sub(";$","",PWD.split()[1])
+					ShowPWD=re.sub("/{2,}","/",ShowPWD)
+					ShowPWD=re.sub("cd *","",ShowPWD)
+				else:
+					ShowPWD=re.sub(";$|cd *","",PWD)
+			except Exception,e:
+				ShowPWD=PWD
+				pass
+			cmd=raw_input("%s %s>>>> " % (CmdPrompt,ShowPWD  ))
 		else:
 			time.sleep(0.05)
 			continue
-
 		try:
 			if not IS_PWD:
-				PWD=re.search("^ *cd.*",cmd).group() +";"
-				Done_Status='end'
-				IS_PWD=True
-				continue
+				if re.search("^ *cd.*",cmd):
+					try:
+						cmd.split()[1]
+					except IndexError:
+						PWD="cd ~;"
+						continue
+					PWD=re.search("^ *cd.*",cmd).group() +";"
+					IS_PWD=True
+					if not os.path.isfile("/cheung/flag/.NoAsk"):
+						AskNotice=raw_input("\033[1;33m注意: 请您确保切换的路径[%s]在远程服务器上是存在的，否则切换路径没有任何意义,您清楚了吗？\033[0m(yes/no) " % (re.sub("^ *cd *|;","",PWD)))
+						if re.search("[Yy]([Ee][Ss])?",AskNotice):
+							AskCancel=raw_input("是否取消以上提示？(yes/no) ")
+							if re.search("[Yy]([Ee][Ss])?",AskCancel):
+								try:
+									os.mknod("/cheung/flag/.NoAsk")
+									os.system("chmod 777 /cheung/flag/.NoAsk")
+									print "已取消提醒"
+								except Exception,e:
+									print "抱歉，不能取消提示(%s)" %e
+						else:
+							print "如果您对以上提示不清楚,那么那您可以在远程服务器上手动%s 那一定会报错的，所以请确保[%s]有效!" % (re.sub(";","",PWD),re.sub("^ *cd *|;","",PWD))
+							sys.exit()
+
+
+
+					continue
+				else:
+					if PWD=="~":
+						PWD="cd %s;" % PWD
 			else:
 				try:
-					PWD=re.search("^ *cd.*",cmd).group() +";"
-					Done_Status='end'
-					IS_PWD=True
-					continue
-				except:
+					if re.search("^ *cd.*",cmd):
+						try:
+							cmd.split()[1]
+						except IndexError:
+							PWD="cd ~;"
+							continue
+						if re.search("^[a-zA-Z].*",cmd.split()[1]):
+							PWD=PWD.strip(";")+"/" +re.search("^[a-zA-Z].*",cmd.split()[1]).group()+";"
+						else:
+							PWD=cmd +";"
+						
+						IS_PWD=True
+						continue
+				except Exception,e:
 					pass
 		except Exception,e:
-			PWD=''
+			if IS_PWD:
+				PWD=PWD
+			else:
+				PWD="cd %s;" % PWD
+		if re.search("^ *[Rr][Uu][Nn]",cmd):
+			try:
+				ScriptFilePath=cmd.split()[1]
+				if not os.path.isfile(ScriptFilePath):
+					print "您指的定程序[%s]不存在！" % ScriptFilePath
+					continue
+				else:
+					ScriptFlag=str(random.randint(999999999,999999999999))
+					d_file='/tmp/' + os.path.basename(ScriptFilePath) + ScriptFlag
+					for s in Servers_T:
+						d_file='/tmp/' + os.path.basename(ScriptFilePath) + ScriptFlag
+						if UseKey=="Y":
+							LocalScriptUpload(s,ServersPort[s],ServersUsername[s],None,ScriptFilePath,d_file)
+						else:
+							LocalScriptUpload(s,ServersPort[s],ServersUsername[s],ServersPassword[s],ScriptFilePath,d_file)
+					Newcmd="""chmod a+x %s;%s;rm -f %s""" %(d_file,d_file,d_file)
+					UseLocalScript="Y"
+					Logcmd=ScriptFilePath
+			except IndexError:
+				print "您尚未指定本服务器上的脚本路径 用法: run /path/scriptfile"
+				continue
+		else:
+			UseLocalScript="N"
+			Newcmd=cmd
+			Logcmd=cmd
 
 		if re.search("^ *[Ee][Xx][Ii][Tt] *",cmd):
 			sys.exit(0)
 		if re.search("^ *[Cc][Ll][Ee][Aa][Rr] *",cmd):
-			print "请使用ctrl + L 清屏"
+			os.system("clear")
 			continue
 		if re.search('^ *[Ff][Ll][Uu][Ss][Hh] *[Ll][Oo][Gg][Ss] *$',cmd):
 			try:
@@ -657,12 +790,6 @@ def Excute_cmd():
 			except Exception,e:
 				print "Waring : %s Failed (%s)" % (cmd,e)
 				continue
-		if cmd=="reload":
-			Read_config()
-			print "+OK"
-			continue
-			
-		
 		cmd=re.sub('^ *ll','ls -l',cmd)
 		if re.search("^ *$",cmd):
 			continue
@@ -671,63 +798,123 @@ def Excute_cmd():
 			continue
 		cmd=re.sub("^ *top","top  -b -d 1 -n 1",cmd)
 		cmd=re.sub("^ *ping","ping  -c 4",cmd)
-			
+		if re.search("^ *[Uu][Ss][Ee] +[Ss]",cmd):
+			UseSystem=True
+			CmdPrompt="%s conf" % (CmdPrompt)
+			continue
+		if UseSystem:
+			if re.search("^ *[Ss][Hh][Oo][Ww] *",cmd):
+				print "所有主机		: %s" % Servers
+				print "当前可接受命令的主机	: %s" %Servers_T
+				if LastCMD:
+					print "执行命令%s失败的的主机	: %s" % (LastCMD,FailIP)
+				continue
+			elif re.search("^ *[Ss][Ee][Ll][Ee][Cc][Tt] *",cmd):
+				try:
+					SelectFailIP=cmd.split()[1]
+					T=re.search("[Ff] *|[Aa][Ii][Ll] *",SelectFailIP)
+					if T:
+						if not FailIP:
+							print "当前没有执行命令失败的主机,无法选定"
+						else:
+							Servers_T=FailIP
+						continue
+				except IndexError:
+					print  "您尚未选定主机 select 主机地址"
+					continue
+				SelectServer=cmd.split()[1]
+				SelectFail=False
+				for a in SelectServer.split(','):
+					if not a in Servers:
+						print "您选定的服务器%s不在配置文件中，所以选定失败,请重新选定" % a
+						SelectFail=True
+						break
+						
+				if SelectFail:
+					SelectFail=False
+					continue
+				Servers_T=[]
+				for a in SelectServer.split(','):
+					Servers_T.append(a)
+				print "您选定的远程服务器是：",Servers_T
+				continue
+			elif re.search("^ *[Nn][Oo] +[Uu] *",cmd):
+				UseSystem=False
+				CmdPrompt="%s" % (re.sub(" conf","",CmdPrompt))
+				print "已退出配置模式"
+				continue
+			elif re.search("^ *[Nn][Oo] +[Ss][Ee][Ll][Ee][Cc][Tt] *$",cmd):
+				Servers_T=Servers
+				print "取消选定主机"
+				continue
+			elif re.search("^ *[Nn][Oo] +[Aa]|[Ll]{2} *$",cmd):
+				Servers_T=Servers
+				UseSystem=False
+				print "已取消所有设置"
+				continue
+			elif re.search("^ *\? *$",cmd) or re.search("^ *[Hh]([Ee][Ll][Pp])? *$",cmd):
+				print """内部命令：
+	use     system      进入CheungSSH内部系统命令
+	no      use         退出配置模式
+	no      select      取消选定的主机,回复配置文件中指定的主机
+	no      all         取消在配置模式中的所有设置
+	select  hostname    选定一个或者多个主机，多个主机用逗号 "," 分开前提是这些主机必须在配置文件中已经配置好了
+	select	fail        选定失败的主机
+	show                显示主机分布情况"""
+				continue
+			else:
+				print "抱歉，CheungSSH暂时不支持您输入的内部命令,如果要执行Linux命令，请使用no use退出"
+				continue
+		else:
+			IsBack=False
+			if re.search("^ *[Ss][Hh][Oo][Ww] *",cmd):
+				IsBack=True
+			elif re.search("^ *[Ss][Ee][Ll][Ee][Cc][Tt] *",cmd):
+				IsBack=True
+			elif re.search("^ *[Nn][Oo] +[Aa]|[Ll]{2} *$",cmd):
+				IsBack=True
+			elif re.search("^ *[Nn][Oo] +[Ss][Ee][Ll][Ee][Cc][Tt] *$",cmd):
+				IsBack=True
+			if IsBack:
+				print "该命令是内部命令，请使用use sys进入配置模式执行"
+				IsBack=False
+				continue
+
 		Global_start_time=time.time()
-		for s in Servers.split(","):
-			
-			try:
-				t_password=All_pass["%s_Password" % (s)]
-			except:
-				t_password=Password
-			try:
-				if UseKey=="y":
-					t_username=Username
-				else:
-					t_username=All_user["%s_Username" % (s)]
-			except:
-				t_username=Username
-			try:
-				t_port=All_port["%s_Port" % (s)]
-			except:
-				t_port=Port
-			if LocalScript.lower() == 'y':
-				if not os.path.isfile(cmd):
-					print "Eroor: %s ScriptFile is not fond " % cmd
-					#continue
-					break
-				else:
-					ScriptFlag=str(random.randint(999999999,999999999999))
-					d_file='/tmp/' + os.path.basename(cmd) + ScriptFlag
-					LocalScriptUpload(s,t_port,t_username,t_password,cmd,d_file)
-					Newcmd="""chmod a+x %s;%s;rm -f %s""" % (d_file,d_file,d_file)
-					Logcmd=cmd
-					UseLocalScript='Y'
-			else:
-				Newcmd=cmd
-				Logcmd=cmd
-			
-			Done_Status='start'
+		#for s in Servers_T.split(","):
+		FailIP=[]
+		LastCMD=cmd
+		ScriptFlag=str(random.randint(999999999,999999999999))
+		Done_Status='start'
+		for s in Servers_T:
 			if RunMode.upper()=='M':
-				if Useroot=='y':
-					a=threading.Thread(target=Excute_cmd_root,args=(s,t_port,t_username,t_password,Passwordroot,Newcmd,UseLocalScript,OPTime))
+				if Useroot=='Y':
+					if UseKey=="Y":
+						a=threading.Thread(target=Excute_cmd_root,args=(s,ServersPort[s],ServersUsername[s],None,ServersRootPassword[s],Newcmd,UseLocalScript,OPTime))
+					else:
+						a=threading.Thread(target=Excute_cmd_root,args=(s,ServersPort[s],ServersUsername[s],ServersPassword[s],ServersRootPassword[s],Newcmd,UseLocalScript,OPTime))
 					a.start()
 				else:
-					
-					a=threading.Thread(target=SSH_cmd,args=(s,t_username,t_password,t_port,Newcmd,UseLocalScript,OPTime))
+					if UseKey=="Y":
+						a=threading.Thread(target=SSH_cmd,args=(s,ServersUsername[s],None,ServersPort[s],Newcmd,UseLocalScript,OPTime))
+					else:
+						a=threading.Thread(target=SSH_cmd,args=(s,ServersUsername[s],ServersPassword[s],ServersPort[s],Newcmd,UseLocalScript,OPTime))
+
 					a.start()
 					
 			else:
-				if Useroot=='y':
-					Excute_cmd_root(s,Port,t_username,t_password,Passwordroot,Newcmd,UseLocalScript,OPTime)
-				else:
-					if Deployment=='y':
-						ListenLog="""if [ ! -r %s ] ; then echo -e '\033[1m\033[1;31m-ERR ListenFile %s  not exists,so do not excute commands !\033[1m\033[0m\a ' 1>&2 ;exit;else nohup tail -n 0 -f  %s  2&>%s &   fi;""" % (ListenFile,ListenFile,ListenFile,DeploymentFlag)
-						SSH_cmd(s,t_username,t_password,t_port,Newcmd,UseLocalScript,OPTime)
+				if Useroot=='Y':
+					if UseKey=="Y":
+						Excute_cmd_root(s,ServersPort[s],ServersUsername[s],None,ServersRootPassword[s],Newcmd,UseLocalScript,OPTime)
 					else:
-						SSH_cmd(s,t_username,t_password,t_port,Newcmd,UseLocalScript,OPTime)
+						Excute_cmd_root(s,ServersPort[s],ServersUsername[s],ServersPassword[s],ServersRootPassword[s],Newcmd,UseLocalScript,OPTime)
+				else:
+					if Deployment=='Y':
+						ListenLog="""if [ ! -r %s ] ; then echo -e '\033[1m\033[1;31m-ERR ListenFile %s  not exists,so do not excute commands !\033[1m\033[0m\a ' 1>&2 ;exit;else nohup tail -n 0 -f  %s  2&>%s &   fi;""" % (ListenFile,ListenFile,ListenFile,DeploymentFlag)
+					SSH_cmd(s,ServersUsername[s],ServersPassword[s],ServersPort[s],Newcmd,UseLocalScript,OPTime)
 							
 			############################################################################################
 if  __name__=='__main__':
 	InitInstall()
 	Read_config()
-	Main_p(Servers,Port,Username,Password)
+	Main_p()
