@@ -2,7 +2,7 @@
 #coding:utf8
 #Author=Cheung Kei-Chuen
 #QQ 741345015
-VERSION=106
+VERSION=108
 import os,sys
 BUILD_CMD=['exit','flush logs']
 os.sys.path.insert(0,os.path.abspath('./'))
@@ -111,12 +111,14 @@ RunMode=M
 		print "\033[1;33m您使用了新版本，相比之前的老版本在配置上会有所变化，请重新对\n/cheung/conf/cheung.conf\n/cheung/conf/hosts进行配置\a\033[0m"
 	if not os.path.isfile('/cheung/conf/hosts'):
 		T=open('/cheung/conf/cheung.conf','w')
-		T.write("""主机地址===端口===登陆账户===登陆密码===su-root密码
+		T.write("""[Hosts-Name]
+主机地址===端口===登陆账户===登陆密码===su-root密码
 #如果您担心安全问题，在密码列位置，您可以使用...===None===...表示不在配置文件中指定，而是在您执行命令的时候系统会询问您密码。比如以下配置:
 #127.0.0.1===222===root===None===None
 #locallhost===22===root===MyPassword===su-root的密码,如果没有使用Useroot，此列也可以填写None
 #None的特殊指定只能针对密码特别指定，不能在账户名，或者是端口，主机这三列中使用
-#注意:在每一个配置中，请不要有空格或者是制表符!""")
+#注意:在每一个配置中，请不要有空格或者是制表符!
+#在所有的配置列中，请用三个等于（===）分割开，并确保有5列！""")
 		T.close()
 
 
@@ -220,8 +222,8 @@ def SSH_cmd(ip,username,password,port,cmd,UseLocalScript,OPTime):
 		Done_Status='end'
 
 def Read_config(file="/cheung/conf/cheung.conf"):
-	global Servers,Useroot,Timeout,RunMode,UseKey,Deployment,ListenTime,ListenFile,ListenChar,ServersPort,ServersPassword,ServersUsername,ServersRootPassword,NoPassword,NoRootPassword
-	ServersPort={};ServersPassword={};ServersUsername={};ServersRootPassword={};Servers=[]
+	global Servers,Useroot,Timeout,RunMode,UseKey,Deployment,ListenTime,ListenFile,ListenChar,ServersPort,ServersPassword,ServersUsername,ServersRootPassword,NoPassword,NoRootPassword,HostsGroup
+	ServersPort={};ServersPassword={};ServersUsername={};ServersRootPassword={};Servers=[];HostsGroup={}
 	c=ConfigParser.ConfigParser()
 	try:
 		c.read(file)
@@ -277,18 +279,33 @@ def Read_config(file="/cheung/conf/cheung.conf"):
 		HostsFile="/cheung/conf/hosts"
 		T=open(HostsFile)
 		NoPassword=False
+		OneFlag=True
 		for b in T:
-			if re.search("^#",b):
+			if re.search("^#",b) or re.search("^ *$",b):
 				continue
+			if re.search("^ *\[.*\] *$",b):
+				CurGroup=re.sub("^ *\[|\] *$","",b).strip()
+				HostsGroup[CurGroup]=[]
+				OneFlag=False
+				continue
+			else:
+				if OneFlag:
+					print "请为hosts文件第一行处命令一个主机组的名字 [主机组名字]"
+					sys.exit()
 			a=b.strip().split("===")
-			if len(a)!=5:
-				print """您的配置文件中没有足够的列:\033[1m\033[1;31m[%s]\033[1m\033[0m\a
-请使用如下格式:
-主机地址===端口号===登陆账户===登陆密码===su-root密码，如果没有配置使用su-root，此列可为None""" % b.strip()
-				sys.exit()
 			ServersPort[a[0]]=int(a[1])
 			Servers.append(a[0])
+			try:
+				HostsGroup[CurGroup].append(a[0])
+			except Exception,e:
+				HostsGroup[CurGroup]=[]
+				HostsGroup[CurGroup].append(a[0])
 			if UseKey.upper()=="N":
+				if len(a)<5:
+					print """您的配置文件中没有足够的列:\033[1m\033[1;31m[%s]\033[1m\033[0m\a
+请使用如下格式:
+主机地址===端口号===登陆账户===登陆密码===su-root密码，如果没有配置使用su-root，此列可为None""" % b.strip()
+					sys.exit()
 				ServersUsername[a[0]]=a[2]
 				TP=re.search("^[Nn][Oo][Nn][Ee]$",a[3])
 				if TP:
@@ -299,6 +316,12 @@ def Read_config(file="/cheung/conf/cheung.conf"):
 					ServersPassword[a[0]]=a[3]
 						
 			else:
+				if len(a)<5:
+					print """您的配置文件中没有足够的列:\033[1m\033[1;31m[%s]\033[1m\033[0m\a
+请使用如下格式:
+主机地址===端口号===使用了Key登陆此处可填写None===使用了Key登陆此处可填写None===su-root密码，如果没有配置使用su-root，此列填写None""" % b.strip()
+					sys.exit()
+				
 				ServersUsername[a[0]]=getpass.getuser()
 			NoRootPassword=False
 			if Useroot.upper()=="Y":
@@ -317,7 +340,7 @@ def Read_config(file="/cheung/conf/cheung.conf"):
 		T.close()
 	except IndexError:
 		print """您的主机文件中，没有足够的配置，正确的应该是:
-主机===端口===账户名===密码"""
+主机列===端口列===账户名列===密码列===su-root密码列"""
 		sys.exit()
 	except Exception,e:
 		print "读取配置错误 %s (%s) "%(e,HostsFile)
@@ -333,8 +356,6 @@ def Read_config(file="/cheung/conf/cheung.conf"):
 		Timeout=socket.setdefaulttimeout(10)
 
 	print "Servers:%d|RunMode:%s|Deployment:%s|UseKey:%s|CurUser:%s|Useroot:%s  \n" % (len(ServersPort),RunMode,Deployment,UseKey,getpass.getuser(),Useroot)
-
-
 def Upload_file(ip,port,username,password):
 	start_time=time.time()
 	global All_Servers_num,All_Servers_num_all,All_Servers_num_Succ,Global_start_time
@@ -804,8 +825,11 @@ def Excute_cmd():
 			continue
 		if UseSystem:
 			if re.search("^ *[Ss][Hh][Oo][Ww] *",cmd):
-				print "所有主机		: %s" % Servers
+				print "所有主机地址	: %s" % Servers
 				print "当前可接受命令的主机	: %s" %Servers_T
+				print """主机组:"""
+				for B in HostsGroup:
+					print "\t%s组主机: %s" % (B,HostsGroup[B])
 				if LastCMD:
 					print "执行命令%s失败的的主机	: %s" % (LastCMD,FailIP)
 				continue
@@ -823,8 +847,26 @@ def Excute_cmd():
 					print  "您尚未选定主机 select 主机地址"
 					continue
 				SelectServer=cmd.split()[1]
+				if re.search("^ *[Aa][Ll]{2} *",SelectServer):
+					Servers_T=Servers
+					print "已选定所有主机: %s" % (Servers_T)
+					continue
+				IsSelectHostsGroup=False
+				Host_I_Flag=True
+				for c in SelectServer.split(","):
+					if c in HostsGroup.keys():
+						if Host_I_Flag:
+							Servers_T=HostsGroup[c]
+							Host_I_Flag=False
+						else:
+							Servers_T=HostsGroup[c]+Servers_T
+						IsSelectHostsGroup=True
+				if IsSelectHostsGroup:
+					print "您已经选定主机组 : %s" %Servers_T
+					IsSelectHostsGroup=False
+					continue
 				SelectFail=False
-				for a in SelectServer.split(','):
+				for a in SelectServer.split(","):
 					if not a in Servers:
 						print "您选定的服务器%s不在配置文件中，所以选定失败,请重新选定" % a
 						SelectFail=True
@@ -860,6 +902,7 @@ def Excute_cmd():
 	no      all         取消在配置模式中的所有设置
 	select  hostname    选定一个或者多个主机，多个主机用逗号 "," 分开前提是这些主机必须在配置文件中已经配置好了
 	select	fail        选定失败的主机
+	select  HostsGroupName 选定主机组
 	show                显示主机分布情况"""
 				continue
 			else:
@@ -881,7 +924,6 @@ def Excute_cmd():
 				continue
 
 		Global_start_time=time.time()
-		#for s in Servers_T.split(","):
 		FailIP=[]
 		LastCMD=cmd
 		ScriptFlag=str(random.randint(999999999,999999999999))
