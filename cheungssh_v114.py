@@ -2,7 +2,7 @@
 #coding:utf8
 #Author=Cheung Kei-Chuen
 #QQ 741345015
-VERSION=112
+VERSION=114
 import os,sys
 BUILD_CMD=['exit','flush logs']
 os.sys.path.insert(0,os.path.abspath('./'))
@@ -220,7 +220,7 @@ def SSH_cmd(ip,username,password,port,cmd,UseLocalScript,OPTime):
 			FailNumShow="\033[1m\033[1;31mFail:%d\033[1m\033[0m" % (FailNum)
 		else:
 			FailNumShow="Fail:%d" % (FailNum)
-		print "+Done (Succ:%d,%s, %0.2fSec GUN/Linux Cheung Kei-Chuen All Right Reserved)" % (All_Servers_num_Succ,FailNumShow,time.time()-Global_start_time)
+		print "+Done (Succ:%d,%s, %0.2fSec CheungSSH(V:%d) Cheung Kei-Chuen All Right Reserved)" % (All_Servers_num_Succ,FailNumShow,time.time()-Global_start_time,VERSION)
 		All_Servers_num =0
 		All_Servers_num_Succ=0
 		Done_Status='end'
@@ -403,7 +403,7 @@ def Upload_file(ip,port,username,password):
 		else:
 			FailNumShow="Fail:%d" % (FailNum)
 		
-		print "+Done (Succ:%d,%s, %0.2fSec GUN/Linux Cheung Kei-Chuen All Right Reserved)" % (All_Servers_num_Succ,FailNumShow,time.time()-Global_start_time)
+		print "+Done (Succ:%d,%s, %0.2fSec CheungSSH(V:%d) Cheung Kei-Chuen All Right Reserved)" % (All_Servers_num_Succ,FailNumShow,time.time()-Global_start_time,VERSION)
 		All_Servers_num =0
 		All_Servers_num_Succ=0
 
@@ -444,7 +444,7 @@ def Download_file_regex(ip,port,username,password):
 			FailNumShow="\033[1m\033[1;31mFail:%d\033[1m\033[0m" % (FailNum)
 		else:
 			FailNumShow="Fail:%d" % (FailNum)
-		print "+Done (Succ:%d,%s, %0.2fSec GUN/Linux Cheung Kei-Chuen All Right Reserved)" % (All_Servers_num_Succ,FailNumShow,time.time()-Global_start_time)
+		print "+Done (Succ:%d,%s, %0.2fSec CheungSSH(V:%d) Cheung Kei-Chuen All Right Reserved)" % (All_Servers_num_Succ,FailNumShow,time.time()-Global_start_time,VERSION)
 		
 
 def Download_file(ip,port,username,password):
@@ -476,7 +476,7 @@ def Download_file(ip,port,username,password):
 			FailNumShow="\033[1m\033[1;31mFail:%d\033[1m\033[0m" % (FailNum)
 		else:
 			FailNumShow="Fail:%d" % (FailNum)	
-		print "+Done (Succ:%d,%s, %0.2fSec GUN/Linux Cheung Kei-Chuen All Right Reserved)" % (All_Servers_num_Succ,FailNumShow,time.time()-Global_start_time)
+		print "+Done (Succ:%d,%s, %0.2fSec CheungSSH(V:%d) Cheung Kei-Chuen All Right Reserved)" % (All_Servers_num_Succ,FailNumShow,time.time()-Global_start_time,VERSION)
 
 
 
@@ -656,13 +656,13 @@ def Excute_cmd_root(s,Port,Username,Password,Passwordroot,cmd,UseLocalScript,OPT
 			bufflog=bufflog_new
 		else:
 			All_Servers_num += 1
-			FailIP.append(ip)
+			FailIP.append(s)
 			ResultSum=buff + "\n\033[1m\033[1;31m-ERR Su Failed %s (%0.2f Sec All %d Done %d)\033[1m\033[0m\n" % (s,float(time.time() - start_time),All_Servers_num_all,All_Servers_num)
 			
 	except Exception,e:
 		All_Servers_num += 1
 		Result_status=False
-		FailIP.append(ip)
+		FailIP.append(s)
 		ResultSum="\n\033[1m\033[1;31m-ERR %s %s (%0.2f Sec All %d Done %d)\033[1m\033[0m\a"   % (e,s,float(time.time() - start_time),All_Servers_num_all,All_Servers_num)
 		bufflog=str(e)
 	if Result_status:
@@ -685,7 +685,7 @@ def Excute_cmd_root(s,Port,Username,Password,Passwordroot,cmd,UseLocalScript,OPT
 			FailNumShow="\033[1m\033[1;31mFail:%d\033[1m\033[0m" % (FailNum)
 		else:
 			FailNumShow="Fail:%d" % (FailNum)
-		print "+Done (Succ:%d,%s, %0.2fSec GUN/Linux Cheung Kei-Chuen All Right Reserved)" % (All_Servers_num_Succ,FailNumShow,time.time()-Global_start_time)
+		print "+Done (Succ:%d,%s, %0.2fSec CheungSSH(V:%d) Cheung Kei-Chuen All Right Reserved)" % (All_Servers_num_Succ,FailNumShow,time.time()-Global_start_time,VERSION)
                 All_Servers_num =0
                 All_Servers_num_Succ=0
 		Done_Status='end'
@@ -931,6 +931,8 @@ def Excute_cmd():
 				IsBack=True
 			elif re.search("^ *[Nn][Oo] +[Aa]|[Ll]{2} *$",cmd):
 				print re.search("^ *[Nn][Oo] +[Aa]|[Ll]{2} *$",cmd).group()
+				IsBack=True
+			elif re.search("^ *[Nn][Oo] +[Uu][Ss][Ee] *$",cmd):
 				IsBack=True
 			elif re.search("^ *[Nn][Oo] +[Ss][Ee][Ll][Ee][Cc][Tt] *$",cmd):
 				IsBack=True
