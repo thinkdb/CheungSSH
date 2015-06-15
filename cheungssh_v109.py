@@ -2,7 +2,7 @@
 #coding:utf8
 #Author=Cheung Kei-Chuen
 #QQ 741345015
-VERSION=108
+VERSION=109
 import os,sys
 BUILD_CMD=['exit','flush logs']
 os.sys.path.insert(0,os.path.abspath('./'))
@@ -110,9 +110,9 @@ RunMode=M
 		T.close()
 		print "\033[1;33m您使用了新版本，相比之前的老版本在配置上会有所变化，请重新对\n/cheung/conf/cheung.conf\n/cheung/conf/hosts进行配置\a\033[0m"
 	if not os.path.isfile('/cheung/conf/hosts'):
-		T=open('/cheung/conf/cheung.conf','w')
+		T=open('/cheung/conf/hosts','w')
 		T.write("""[Hosts-Name]
-主机地址===端口===登陆账户===登陆密码===su-root密码
+#主机地址===端口===登陆账户===登陆密码===su-root密码
 #如果您担心安全问题，在密码列位置，您可以使用...===None===...表示不在配置文件中指定，而是在您执行命令的时候系统会询问您密码。比如以下配置:
 #127.0.0.1===222===root===None===None
 #locallhost===22===root===MyPassword===su-root的密码,如果没有使用Useroot，此列也可以填写None
@@ -485,6 +485,9 @@ def Main_p():
 	#All_Servers_num_all=len(Servers.split(','))
 	All_Servers_num    =0
 	All_Servers_num_Succ=0
+	if not Servers:
+		print "没有配置服务器地址"
+		sys.exit()
 	try:
 		from optparse import OptionParser
 		p=OptionParser()
@@ -520,15 +523,15 @@ def Main_p():
 			for a in Servers:
 				ServersPassword[a]=SetPassword
 			NoPassword=False
-		if NoRootPassword:
-			SetRootPassword=getpass.getpass("请指定su-root的密码: ")
-			if SetRootPassword:
-				print  "已指定su - root密码"
-				NoRootPassword=False
-			else:
-				print "您尚未指定su - root的密码,程序退出"
-				sys.exit()
-
+		if Useroot=="Y":
+			if NoRootPassword:
+				SetRootPassword=getpass.getpass("请指定su-root的密码: ")
+				if SetRootPassword:
+					print  "已指定su - root密码"
+					NoRootPassword=False
+				else:
+					print "您尚未指定su - root的密码,程序退出"
+					sys.exit()
 		if option.excute_type == "cmd":
 			Excute_cmd()
 		elif option.excute_type == "upload":
