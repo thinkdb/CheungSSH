@@ -2,7 +2,7 @@
 #coding:utf8
 #Author=Cheung Kei-Chuen
 #QQ 741345015
-VERSION=110
+VERSION=112
 import os,sys
 BUILD_CMD=['exit','flush logs']
 os.sys.path.insert(0,os.path.abspath('./'))
@@ -30,27 +30,29 @@ if int(T_V.replace(".","")) <240:
 
 
 def Write_Log(ip,stderr,stdout,Logcmd,LogFile,useroot,username,UseLocalScript,Deployment,DeploymentStatus,OPTime):
+	os.system("chmod 777 /cheung/logs/* 2>/dev/null")
 	if DeploymentStatus:
-		DeploymentStatus='Y'
+		DeploymentStatus_T='Y'
 	else:
-		DeploymentStatus='N'
+		DeploymentStatus_T='N'
 	if UseKey=="Y":
 		username=getpass.getuser()
 	Deployment=Deployment.upper()
 	
 	try:
 		T=open(LogFile,"a")
-		T.write(ip+ '===' + "用户名:" +username  + '===' + "时间:"+OPTime   + '===' + "是否使用su-root:"+useroot + '===' + "是否使用脚本:" + UseLocalScript + '===' + "是否使用部署模式:"+Deployment + '===' +"部署完成状态"+ DeploymentStatus + '===' + "命令:"+Logcmd + '===' +"错误显示:"+ stderr + '===' +"正确显示:"+ stdout)
+		T.write(ip+ '===' + "用户名:" +username  + '===' + "时间:"+OPTime   + '===' + "是否使用su-root:"+useroot + '===' + "是否使用脚本:" + UseLocalScript + '===' + "是否使用部署模式:"+Deployment + '===' +"部署完成状态"+ DeploymentStatus_T + '===' + "命令:"+Logcmd + '===' +"错误显示:"+ stderr + '===' +"正确显示:"+ stdout)
 		T.close()
 	except Exception,e:
 		print "Warning: Can't write log. (%s)" % e
 def WriteSourceLog(MSG):
+	os.system("chmod 777 /cheung/logs/* 2>/dev/null")
 	try:
 		F=open(SLogFile,"a")
 		F.write(MSG)
 		F.close()
 	except Exception,e:
-		print "Can not write to log (%s)" % (e)
+		print "Can not write to source log (%s)" % (e)
 def LocalScriptUpload(ip,port,username,password,s_file,d_file):
 	try:		
 		t = paramiko.Transport((ip,port))
@@ -68,11 +70,13 @@ def LocalScriptUpload(ip,port,username,password,s_file,d_file):
 	else:
 		t.close()
 def InitInstall():
-	if getpass.getuser()=="root":
-		os.system("mkdir -p /cheung/logs /cheung/flag  /cheung/conf /cheung/bin /cheung/version")
+	INITDIR="/cheung/logs /cheung/flag  /cheung/conf /cheung/bin /cheung/version"
+	if not os.path.isdir("/cheung"):
+		if commands.getstatusoutput("mkdir -p %s 2>/dev/null" % (INITDIR))[0]!=0:
+			print "Must be as root Create config file!"
+			sys.exit(1)
 	else:
-		print "Sorry Must be as root install !"
-		sys.exit(1)
+		os.system("mkdir  -p %s 2>/dev/null" % INITDIR)
 	if not os.path.isfile('/cheung/conf/cheung.conf'):
 		T=open('/cheung/conf/cheung.conf','w')
 		T.write("""[CheungSSH]
@@ -93,7 +97,7 @@ RunMode=M
 	except Exception,e:
 		VerR=0
 	if VerR<104:
-		os.system("""echo %s >/cheung/version/version"""%(VERSION))
+		os.system("""echo %s >/cheung/version/version 2>/dev/null"""%(VERSION))
 		T=open('/cheung/conf/cheung.conf','w')
 		T.write("""[CheungSSH]
 #Author=Cheung Kei-Chuen
@@ -284,7 +288,7 @@ def Read_config(file="/cheung/conf/cheung.conf"):
 			if re.search("^#",b) or re.search("^ *$",b):
 				continue
 			if re.search("^ *\[.*\] *$",b):
-				CurGroup=re.sub("^ *\[|\] *$","",b).strip()
+				CurGroup=re.sub("^ *\[|\] *$","",b).strip().lower()
 				HostsGroup[CurGroup]=[]
 				OneFlag=False
 				continue
@@ -299,7 +303,7 @@ def Read_config(file="/cheung/conf/cheung.conf"):
 				HostsGroup[CurGroup].append(a[0])
 			except Exception,e:
 				HostsGroup[CurGroup]=[]
-				HostsGroup[CurGroup].append(a[0])
+				HostsGroup[CurGroup].append(a[0].lower())
 			if UseKey.upper()=="N":
 				if len(a)<5:
 					print """您的配置文件中没有足够的列:\033[1m\033[1;31m[%s]\033[1m\033[0m\a
@@ -486,7 +490,7 @@ def Main_p():
 	All_Servers_num    =0
 	All_Servers_num_Succ=0
 	if not Servers:
-		print "没有配置服务器地址"
+		print "当前没有配置服务器地址,请在/cheung/conf/hosts文件中配置!"
 		sys.exit()
 	try:
 		from optparse import OptionParser
@@ -848,13 +852,14 @@ def Excute_cmd():
 				except IndexError:
 					print  "您尚未选定主机 select 主机地址"
 					continue
-				SelectServer=cmd.split()[1]
+				SelectServer=re.sub("^ *[Ss][Ee][Ll][Ee][Cc][Tt] *| *","",cmd).lower()
 				if re.search("^ *[Aa][Ll]{2} *",SelectServer):
 					Servers_T=Servers
 					print "已选定所有主机: %s" % (Servers_T)
 					continue
 				IsSelectHostsGroup=False
 				Host_I_Flag=True
+				Any_In_HostsGroup=False
 				for c in SelectServer.split(","):
 					if c in HostsGroup.keys():
 						if Host_I_Flag:
@@ -863,6 +868,10 @@ def Excute_cmd():
 						else:
 							Servers_T=HostsGroup[c]+Servers_T
 						IsSelectHostsGroup=True
+						Any_In_HostsGroup=True
+					elif Any_In_HostsGroup:
+						print "您选定的当前主机组: [%s] 不在hosts配置文件中，请重新选定" % c
+						continue
 				if IsSelectHostsGroup:
 					print "您已经选定主机组 : %s" %Servers_T
 					IsSelectHostsGroup=False
@@ -924,6 +933,9 @@ def Excute_cmd():
 				print "该命令是内部命令，请使用use sys进入配置模式执行"
 				IsBack=False
 				continue
+		if len(Servers_T)==0:
+			print "\033[1;33m当前没有设定服务器地址,或者选定的主机组中的服务器列表为空\033[0m"
+			continue
 
 		Global_start_time=time.time()
 		FailIP=[]
