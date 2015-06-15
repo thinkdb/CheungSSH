@@ -2,7 +2,7 @@
 #coding:utf8
 #Author=Cheung Kei-Chuen
 #QQ 741345015
-VERSION=109
+VERSION=110
 import os,sys
 BUILD_CMD=['exit','flush logs']
 os.sys.path.insert(0,os.path.abspath('./'))
@@ -512,8 +512,7 @@ def Main_p():
 			Notice: This parameter applies only to download""" % sys.argv[0])
 		(option,args)=p.parse_args()
 
-
-		if NoPassword:
+		if NoPassword and UseKey=="N":
 			SetPassword=getpass.getpass("请在此处为所有主机指定密码(请确保该密码适用用于所有的服务器，否则请在配置文件/cheung/conf/hosts文件中逐个指定)\n\033[1;33mHosts Password:\033[0m  ")
 			if SetPassword:
 				print "已为所有主机指定密码"
