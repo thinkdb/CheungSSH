@@ -129,7 +129,7 @@ RunMode=M
 
 def SSH_cmd(ip,username,password,port,cmd,UseLocalScript,OPTime):
 	PROFILE=". /etc/profile 2&>/dev/null;. ~/.bash_profile 2&>/dev/null;. /etc/bashrc 2&>/dev/null;. ~/.bashrc 2&>/dev/null;"
-	PATH="export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin;"
+	PATH="export PATH=$PATH:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin;"
 	global All_Servers_num,All_Servers_num_all,All_Servers_num_Succ,Done_Status,Global_start_time,PWD,FailIP
 	start_time=time.time()
 	ResultSum=''
@@ -724,6 +724,7 @@ def Excute_cmd():
 		else:
 			time.sleep(0.05)
 			continue
+		cmd=re.sub('^ *ll','ls -l',cmd)
 		try:
 			if not IS_PWD:
 				if re.search("^ *cd.*",cmd):
@@ -817,7 +818,6 @@ def Excute_cmd():
 			except Exception,e:
 				print "Waring : %s Failed (%s)" % (cmd,e)
 				continue
-		cmd=re.sub('^ *ll','ls -l',cmd)
 		if re.search("^ *$",cmd):
 			continue
 		if re.search("^ *vi",cmd):
@@ -930,6 +930,7 @@ def Excute_cmd():
 			elif re.search("^ *[Ss][Ee][Ll][Ee][Cc][Tt] *",cmd):
 				IsBack=True
 			elif re.search("^ *[Nn][Oo] +[Aa]|[Ll]{2} *$",cmd):
+				print re.search("^ *[Nn][Oo] +[Aa]|[Ll]{2} *$",cmd).group()
 				IsBack=True
 			elif re.search("^ *[Nn][Oo] +[Ss][Ee][Ll][Ee][Cc][Tt] *$",cmd):
 				IsBack=True
