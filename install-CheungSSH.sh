@@ -10,28 +10,6 @@ then
 fi
 
 echo  "Installing..."
-which easy_install 2>/dev/null >/dev/null
-if [ $? -ne 0 ]
-then
-	echo "正在安装 easy_install"
-	wget -q http://peak.telecommunity.com/dist/ez_setup.py
-	if [ $? -ne 0 ]
-	then
-		echo "您的系统没有 easy_install 命令，请手动安装这个命令！"
-		exit 1
-	else
-		python ez_setup.py 2>/dev/null  >/dev/null
-		if [ $? -ne 0 ]
-		then
-			echo "安装easy_install不成功，请尝试重新安装，或者手动安装
-				如果还是不成功，请使用第二种方式手动安装: http://blog.chinaunix.net/uid-29295703-id-4663051.html"
-			
-		else
-			echo "安装easy_install成功"
-		fi
-	fi
-fi
-
 rpm  -qa|grep gcc -q
 if  [ $? -ne 0 ]
 then
@@ -61,7 +39,27 @@ then
 	fi
 fi
 
+which easy_install 2>/dev/null >/dev/null
+if [ $? -ne 0 ]
+then
+        echo "正在下载 easy_install"
+        wget -q http://peak.telecommunity.com/dist/ez_setup.py
+        if [ $? -ne 0 ]
+        then
+                echo "您的系统没有 easy_install 命令，请手动安装这个命令！"
+                exit 1
+        else
+                python ez_setup.py
+                if [ $? -ne 0 ]
+                then
+                        echo "安装easy_install不成功，请尝试重新安装，或者手动安装 如果还是不成功，请使用第二种方式手动安装: http://blog.chinaunix.net/uid-29295703-id-4663051.html"
+			exit
 
+                else
+                        echo "安装easy_install成功"
+                fi
+        fi
+fi
 
 
 which pip 2>/dev/null
