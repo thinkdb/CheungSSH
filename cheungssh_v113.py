@@ -826,8 +826,11 @@ def Excute_cmd():
 		cmd=re.sub("^ *top","top  -b -d 1 -n 1",cmd)
 		cmd=re.sub("^ *ping","ping  -c 4",cmd)
 		if re.search("^ *[Uu][Ss][Ee] +[Ss]",cmd):
-			UseSystem=True
-			CmdPrompt="%s conf" % (CmdPrompt)
+			if UseSystem==True:
+				print "当前已经是Use sys模式"
+			else:
+				UseSystem=True
+				CmdPrompt="%s conf" % (CmdPrompt)
 			continue
 		if UseSystem:
 			if re.search("^ *[Ss][Hh][Oo][Ww] *",cmd):
@@ -913,6 +916,7 @@ def Excute_cmd():
 	no      all         取消在配置模式中的所有设置
 	select  hostname    选定一个或者多个主机，多个主机用逗号 "," 分开前提是这些主机必须在配置文件中已经配置好了
 	select	fail        选定失败的主机
+	select  all	    选定所有主机
 	select  HostsGroupName 选定主机组
 	show                显示主机分布情况"""
 				continue
