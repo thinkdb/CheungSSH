@@ -640,10 +640,18 @@ def Excute_cmd_root(s,Port,Username,Password,Passwordroot,cmd,UseLocalScript,OPT
 			ssh.send("%s\n" % (cmd))
 			buff=""
 			bufflog=''
-			while not buff.endswith("# "):
+			RootCmdGetBack_i=1
+			while True:
 				resp=ssh.recv(9999)
-				buff  += resp
-				bufflog  += resp.strip('\r\n') + '\\n'
+				if RootCmdGetBack_i==1:
+					RootCmdGetBack_i=2
+					continue
+				resp=re.sub(cmd+"\r\n","",resp)
+				if resp.endswith("# "):
+					break
+				else:
+					buff  += resp
+					bufflog  += resp.strip('\r\n') + '\\n'
 			t.close()
 			All_Servers_num += 1
 			ResultSum=buff + "\n\033[1m\033[1;32m+OK %s (%0.2f Sec All %d Done %d)\033[1m\033[0m\n" % (s,float(time.time() - start_time),All_Servers_num_all,All_Servers_num)
@@ -804,7 +812,7 @@ def Excute_cmd():
 			Newcmd=cmd
 			Logcmd=cmd
 
-		if re.search("^ *[Ee][Xx][Ii][Tt] *",cmd):
+		if re.search("^ *[Ee][Xx][Ii][Tt] *$",cmd):
 			sys.exit(0)
 		if re.search("^ *[Cc][Ll][Ee][Aa][Rr] *",cmd):
 			os.system("clear")
