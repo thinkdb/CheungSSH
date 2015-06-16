@@ -2,13 +2,13 @@
 #coding:utf8
 #Author=Cheung Kei-Chuen
 #QQ 741345015
-VERSION=114
+VERSION=115
 import os,sys
 BUILD_CMD=['exit','flush logs']
 os.sys.path.insert(0,os.path.abspath('./'))
 os.sys.path.insert(0,os.path.abspath('/cheung/bin/'))
 try:
-	import paramiko,threading,socket,ConfigParser,time,commands,threading,re,getpass,Format_Char_Show,shutil,random,getpass,LogCollect,readline
+	import paramiko,threading,socket,ConfigParser,time,commands,threading,re,getpass,Format_Char_Show,shutil,random,getpass,LogCollect,readline,filemd5
 except Exception,e:
 	print "\033[1m\033[1;31m-ERR %s\033[0m\a"	% (e)
 	sys.exit(1)
@@ -17,11 +17,12 @@ sys.setdefaultencoding('utf8')
 LogFile='/cheung/logs/cheungssh.log'
 SLogFile='/cheung/logs/cheungssh.source.log'
 DeploymentFlag="/tmp/DeploymentFlag%s" % (str(random.randint(999999999,999999999999)))
+HostsFile="/cheung/conf/hosts"
+ConfFile="/cheung/conf/cheung.conf"
 try:
 	paramiko.util.log_to_file('/cheung/logs/paramiko.log')
 except Exception,e:
 	pass
-#os.system('stty erase ^H')
 T_V=sys.version.split()[0]
 if int(T_V.replace(".","")) <240:
 	print "Python's version can not less than 2.4"
@@ -35,8 +36,6 @@ def Write_Log(ip,stderr,stdout,Logcmd,LogFile,useroot,username,UseLocalScript,De
 		DeploymentStatus_T='Y'
 	else:
 		DeploymentStatus_T='N'
-	if UseKey=="Y":
-		username=getpass.getuser()
 	Deployment=Deployment.upper()
 	
 	try:
@@ -84,9 +83,10 @@ def InitInstall():
 #QQ=741345015
 Useroot=N
 RunMode=M
-#请在/cheung/cong/hosts中指定主机信息
+#请在/cheung/cong/hosts中指定主机的账户名，密码，端口等信息
 #Timeout=3
 #UseKey=N
+#Key的位置默认是在~/.sshd/id_rsa
 #Deployment=N
 #ListenFile=/var/log/messages
 #ListenTime=60
@@ -115,8 +115,10 @@ RunMode=M
 		print "\033[1;33m您使用了新版本，相比之前的老版本在配置上会有所变化，请重新对\n/cheung/conf/cheung.conf\n/cheung/conf/hosts进行配置\a\033[0m"
 	if not os.path.isfile('/cheung/conf/hosts'):
 		T=open('/cheung/conf/hosts','w')
-		T.write("""[Hosts-Name]
+		T.write("""[Hosts-Group1]
 #主机地址===端口===登陆账户===登陆密码===su-root密码
+#[Hosts-Group2]
+#支持多个主机组
 #如果您担心安全问题，在密码列位置，您可以使用...===None===...表示不在配置文件中指定，而是在您执行命令的时候系统会询问您密码。比如以下配置:
 #127.0.0.1===222===root===None===None
 #locallhost===22===root===MyPassword===su-root的密码,如果没有使用Useroot，此列也可以填写None
@@ -226,8 +228,14 @@ def SSH_cmd(ip,username,password,port,cmd,UseLocalScript,OPTime):
 		Done_Status='end'
 
 def Read_config(file="/cheung/conf/cheung.conf"):
-	global Servers,Useroot,Timeout,RunMode,UseKey,Deployment,ListenTime,ListenFile,ListenChar,ServersPort,ServersPassword,ServersUsername,ServersRootPassword,NoPassword,NoRootPassword,HostsGroup
+	global Servers,Useroot,Timeout,RunMode,UseKey,Deployment,ListenTime,ListenFile,ListenChar,ServersPort,ServersPassword,ServersUsername,ServersRootPassword,NoPassword,NoRootPassword,HostsGroup,HOSTSMD5,CONFMD5
 	ServersPort={};ServersPassword={};ServersUsername={};ServersRootPassword={};Servers=[];HostsGroup={}
+	try:
+		HOSTSMD5=filemd5.main(HostsFile)
+		CONFMD5=filemd5.main(ConfFile)
+	except Exception,e:
+		print "读取配置文件错误(%s)" % e
+		sys.exit(1)
 	c=ConfigParser.ConfigParser()
 	try:
 		c.read(file)
@@ -280,7 +288,6 @@ def Read_config(file="/cheung/conf/cheung.conf"):
 	except:
 		UseKey="N"
 	try:
-		HostsFile="/cheung/conf/hosts"
 		T=open(HostsFile)
 		NoPassword=False
 		OneFlag=True
@@ -314,7 +321,7 @@ def Read_config(file="/cheung/conf/cheung.conf"):
 				TP=re.search("^[Nn][Oo][Nn][Ee]$",a[3])
 				if TP:
 					if not NoPassword:
-						print "注意:\033[1;33m\n\t您在[%s]使用了None指定密码，程序将不会读取配置文件中的密码,而是需要您手动指定一个密码用于全部主机,如果这不是您需要的，请重新为每一个主机指定密码!\033[0m"%a[0]
+						print "注意:\033[1;33m\n\t您在[%s]使用了None指定密码\033[0m"%a[0]
 						NoPassword=True
 				else:
 					ServersPassword[a[0]]=a[3]
@@ -326,7 +333,7 @@ def Read_config(file="/cheung/conf/cheung.conf"):
 主机地址===端口号===使用了Key登陆此处可填写None===使用了Key登陆此处可填写None===su-root密码，如果没有配置使用su-root，此列填写None""" % b.strip()
 					sys.exit()
 				
-				ServersUsername[a[0]]=getpass.getuser()
+				ServersUsername[a[0]]=a[2]
 			NoRootPassword=False
 			if Useroot.upper()=="Y":
 				try:
@@ -550,10 +557,18 @@ def Main_p():
 			for s in Servers:
 				if RunMode.upper()=='M':
 					if UseKey=="Y":
-						a=threading.Thread(target=Upload_file,args=(s,ServersPort[s],ServersUsername[s],None))
+						if  float(sys.version[:3])<2.6:
+							Upload_file(s,ServersPort[s],ServersUsername[s],ServersPassword[s])
+						else:
+							a=threading.Thread(target=Upload_file,args=(s,ServersPort[s],ServersUsername[s],ServersPassword[s]))
+							a.start()
+							
 					else:
-						a=threading.Thread(target=Upload_file,args=(s,ServersPort[s],ServersUsername[s],ServersPassword[s]))
-					a.start()
+						if  float(sys.version[:3])<2.6:
+							Upload_file(s,ServersPort[s],ServersUsername[s],ServersPassword[s])
+						else:
+							a=threading.Thread(target=Upload_file,args=(s,ServersPort[s],ServersUsername[s],ServersPassword[s]))
+							a.start()
 				else:
 					if UseKey=="Y":
 						Upload_file(s,ServersPort[s],ServersUsername[s],None)
@@ -699,7 +714,7 @@ def Excute_cmd_root(s,Port,Username,Password,Passwordroot,cmd,UseLocalScript,OPT
 		Done_Status='end'
 
 def Excute_cmd():
-	global All_Servers_num_all,All_Servers_num,All_Servers_num_Succ,Done_Status,Logcmd,ListenLog,Global_start_time,PWD,FailIP,ScriptFilePath
+	global All_Servers_num_all,All_Servers_num,All_Servers_num_Succ,Done_Status,Logcmd,ListenLog,Global_start_time,PWD,FailIP,ScriptFilePath,CONFMD5,HOSTSMD5
 	Done_Status='end'
 	All_Servers_num    =0
 	All_Servers_num_Succ=0
@@ -716,7 +731,7 @@ def Excute_cmd():
 	while True:
 		All_Servers_num_all=len(Servers_T)
 		OPTime=time.strftime('%Y%m%d%H%M%S',time.localtime())
-			
+		Askreboot="no"
 		if Done_Status=='end':
 			try:
 				if IS_PWD:
@@ -732,6 +747,14 @@ def Excute_cmd():
 		else:
 			time.sleep(0.05)
 			continue
+		if HOSTSMD5!=filemd5.main(HostsFile):
+			Askreboot=raw_input("Hosts配置文件发生变化,重启程序[%s]才能生效 (yes/no)? " %sys.argv[0])
+			HOSTSMD5=filemd5.main(HostsFile)
+		elif CONFMD5!=filemd5.main(ConfFile):
+			Askreboot=raw_input("conf配置文件发生变化,重启程序[%s]才能生效 (yes/no)? " %sys.argv[0])
+			CONFMD5=filemd5.main(ConfFile)
+		if re.search("^ *[Yy]([Ee][Ss])? *$",Askreboot):
+			sys.exit()
 		cmd=re.sub('^ *ll','ls -l',cmd)
 		try:
 			if not IS_PWD:
