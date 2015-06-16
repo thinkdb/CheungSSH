@@ -1,6 +1,6 @@
 #!/bin/bash
-#Author=Cheung Kei-Chuen  张其川
-#QQ=741345015
+#Author=Cheung Kei-Chuen
+#QQ=2418731289
 #如果您在使用过程中，遇到了一点点的问题，我都真诚希望您能告诉我！为了改善这个软件， 方便您的工作！
 export LANG=zh_CN.UTF-8
 if [ `id -u` -ne 0 ]
@@ -29,7 +29,7 @@ rpm  -qa|grep python-devel -q
 if  [ $? -ne 0 ]
 then
 	echo  "您的系统没有python-devle包，现在需要安装..."
-	yum  install -y python-devel >/dev/null  2>/dev/null
+	yum  install -y python-devel  2>/dev/null
 	if  [ $? -ne  0 ]
 	then
 		echo "无法安装python-devel，请手动安装python-devel"

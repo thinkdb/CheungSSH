@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #coding:utf8
 #Author=Cheung Kei-Chuen
-#QQ 741345015
+#QQ 2418731289
 VERSION=115
 import os,sys
 BUILD_CMD=['exit','flush logs']
@@ -80,7 +80,7 @@ def InitInstall():
 		T=open('/cheung/conf/cheung.conf','w')
 		T.write("""[CheungSSH]
 #Author=Cheung Kei-Chuen
-#QQ=741345015
+#QQ=2418731289
 Useroot=N
 RunMode=M
 #请在/cheung/cong/hosts中指定主机的账户名，密码，端口等信息
@@ -101,7 +101,7 @@ RunMode=M
 		T=open('/cheung/conf/cheung.conf','w')
 		T.write("""[CheungSSH]
 #Author=Cheung Kei-Chuen
-#QQ=741345015
+#QQ=2418731289
 Useroot=N
 RunMode=M
 #请在/cheung/cong/hosts中指定主机信息
