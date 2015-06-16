@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #coding:utf8
 #Author=Cheung Kei-Chuen
-#QQ 2418731289
+#QQ=2418731289
 VERSION=115
 import os,sys
 BUILD_CMD=['exit','flush logs']
