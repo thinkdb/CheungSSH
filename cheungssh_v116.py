@@ -4,7 +4,6 @@
 #QQ=2418731289
 VERSION=115
 import os,sys
-BUILD_CMD=['exit','flush logs']
 os.sys.path.insert(0,os.path.abspath('./'))
 os.sys.path.insert(0,os.path.abspath('/cheung/bin/'))
 try:
