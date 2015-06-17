@@ -756,6 +756,8 @@ def Excute_cmd():
 		if re.search("^ *[Yy]([Ee][Ss])? *$",Askreboot):
 			sys.exit()
 		cmd=re.sub('^ *ll','ls -l',cmd)
+		cmd=re.sub("^ *top","top  -b -d 1 -n 1",cmd)
+		cmd=re.sub("^ *ping","ping  -c 4",cmd)
 		try:
 			if not IS_PWD:
 				if re.search("^ *cd.*",cmd):
@@ -854,8 +856,6 @@ def Excute_cmd():
 		if re.search("^ *vi",cmd):
 			print "抱歉，当前不支持交互式"
 			continue
-		cmd=re.sub("^ *top","top  -b -d 1 -n 1",cmd)
-		cmd=re.sub("^ *ping","ping  -c 4",cmd)
 		if re.search("^ *[Uu][Ss][Ee] +[Ss]",cmd):
 			if UseSystem==True:
 				print "当前已经是Use sys模式"
