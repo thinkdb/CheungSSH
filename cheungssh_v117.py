@@ -7,7 +7,7 @@ import os,sys
 os.sys.path.insert(0,os.path.abspath('./'))
 os.sys.path.insert(0,os.path.abspath('/cheung/bin/'))
 try:
-	import paramiko,threading,socket,ConfigParser,time,commands,threading,re,getpass,Format_Char_Show,shutil,random,getpass,LogCollect,readline,filemd5
+	import paramiko,threading,socket,ConfigParser,time,commands,threading,re,getpass,Format_Char_Show,shutil,random,getpass,LogCollect,readline,filemd5,command_tab
 except Exception,e:
 	print "\033[1m\033[1;31m-ERR %s\033[0m\a"	% (e)
 	sys.exit(1)
@@ -600,6 +600,15 @@ def Main_p():
 						
 				a.start()
 		elif not option.excute_type:
+			if not os.path.isfile("/cheung/flag/.NoTabAsk"):
+				TabAsk=raw_input("在在新版本中，已经支持TAB补全功能，但是补全的依据是根据您当前所在的这个服务器上的路径为标准的，而并不是远程服务器上的路径，所以您需要确保使用TAB补全后，路径是正确的\n是否取消提示 (yes/no) ")
+				if re.search("^ *[Yy]([Ee][Ss])? *$",TabAsk):
+					try:
+						os.mknod("/cheung/flag/.NoTabAsk")
+						print "已取消提醒"
+					except Exception,e:
+						print "取消提醒失败(%s)" % e
+					
 			Excute_cmd()
 			sys.exit(0)
 		else:
