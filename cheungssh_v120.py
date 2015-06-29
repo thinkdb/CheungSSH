@@ -2,7 +2,7 @@
 #coding:utf8
 #Author=Cheung Kei-Chuen
 #QQ=2418731289
-VERSION=119
+VERSION=120
 import os,sys
 os.sys.path.insert(0,os.path.abspath('./'))
 os.sys.path.insert(0,os.path.abspath('/cheung/bin/'))
@@ -228,7 +228,7 @@ def SSH_cmd(ip,username,password,port,cmd,UseLocalScript,OPTime):
 		Done_Status='end'
 
 def Read_config(file="/cheung/conf/cheung.conf"):
-	global Servers,Useroot,Timeout,RunMode,UseKey,Deployment,ListenTime,ListenFile,ListenChar,ServersPort,ServersPassword,ServersUsername,ServersRootPassword,NoPassword,NoRootPassword,HostsGroup,HOSTSMD5,CONFMD5
+	global Servers,Useroot,Timeout,RunMode,UseKey,Deployment,ListenTime,ListenFile,ListenChar,ServersPort,ServersPassword,ServersUsername,ServersRootPassword,NoPassword,NoRootPassword,HostsGroup,HOSTSMD5,CONFMD5,sudo
 	ServersPort={};ServersPassword={};ServersUsername={};ServersRootPassword={};Servers=[];HostsGroup={}
 	try:
 		HOSTSMD5=filemd5.main(HostsFile)
@@ -287,6 +287,13 @@ def Read_config(file="/cheung/conf/cheung.conf"):
 		UseKey=c.get("CheungSSH","UseKey").upper()
 	except:
 		UseKey="N"
+	try:
+		sudo=c.get("CheungSSH","sudo").upper()
+	except:
+		sudo='N'
+	if Useroot=='Y'  and sudo=='Y':
+		print "您已经su-root了，不能再配置sudo，可以sudo=N后，使用su-root"
+		sys.exit(1)
 	try:
 		T=open(HostsFile)
 		NoPassword=False
@@ -364,9 +371,9 @@ def Read_config(file="/cheung/conf/cheung.conf"):
 			Timeout=3
 			print "Warning: Timeout's Value Error, default=3 (Sec)"
 	except Exception,e:
-		Timeout=socket.setdefaulttimeout(10)
+		Timeout=socket.setdefaulttimeout(3)
 
-	print "Servers:%d|RunMode:%s|Deployment:%s|UseKey:%s|CurUser:%s|Useroot:%s  \n" % (len(ServersPort),RunMode,Deployment,UseKey,getpass.getuser(),Useroot)
+	print "Servers:%d|RunMode:%s|Deployment:%s|UseKey:%s|CurUser:%s|Useroot:%s|sudo:%s  \n" % (len(ServersPort),RunMode,Deployment,UseKey,getpass.getuser(),Useroot,sudo)
 def Upload_file(ip,port,username,password):
 	start_time=time.time()
 	global All_Servers_num,All_Servers_num_all,All_Servers_num_Succ,Global_start_time
@@ -492,7 +499,7 @@ def Download_file(ip,port,username,password):
 	
 def Main_p():
 	global s_file,d_file,All_Servers_num_Succ,LocalScript,Global_start_time,NoPassword,NoRootPassword
-	global All_Servers_num_all,All_Servers_num
+	global All_Servers_num_all,All_Servers_num,ServersPassword
 	#All_Servers_num_all=len(Servers.split(','))
 	All_Servers_num    =0
 	All_Servers_num_Succ=0
@@ -527,6 +534,8 @@ def Main_p():
 			SetPassword=getpass.getpass("请在此处为所有主机指定密码(请确保该密码适用用于所有的服务器，否则请在配置文件/cheung/conf/hosts文件中逐个指定)\n\033[1;33mHosts Password:\033[0m  ")
 			if SetPassword:
 				print "已为所有主机指定密码"
+				for a in Servers:
+					ServersPassword[a]=SetRootPassword
 			else:
 				print "您尚未指定密码，程序退出"
 				sys.exit()
@@ -539,6 +548,8 @@ def Main_p():
 				if SetRootPassword:
 					print  "已指定su - root密码"
 					NoRootPassword=False
+					for a in Servers:
+						ServersRootPassword[a]=SetRootPassword
 				else:
 					print "您尚未指定su - root的密码,程序退出"
 					sys.exit()
@@ -619,9 +630,95 @@ def Main_p():
 		print "exit"
 	except EOFError:
 		print "exit"
+def Excute_sudo(s,Port,Username,Password,cmd,UseLocalScript,OPTime):
+	global All_Servers_num_all,All_Servers_num,All_Servers_num_Succ,Done_Status,bufflog,FailIP,PWD,sudoUser
+	PWD=re.sub("/{2,}","/",PWD)
+	Done_Status='start'
+	bufflog=''
+	start_time=time.time()
+	ResultSum=''
+	Result_status=False
+	try:
+		t=paramiko.SSHClient()
+                if UseKey=='Y':
+			KeyPath=os.path.expanduser('~/.ssh/id_rsa')
+                        key=paramiko.RSAKey.from_private_key_file(KeyPath)
+                        t.load_system_host_keys()
+			t.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                        t.connect(s,Port,Username,pkey=key) 
+                else:
+			t.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+			t.connect(s,Port,Username,Password)
+		ssh=t.invoke_shell()
+		ssh.send("""export PS1='###@@@' LANG=zh_CN.UTF-8;%s%s\n""" %(PWD,cmd) )
+		buff=''
+		one_sudo=True
+		usesudop=False
+		while True:
+			
+			resp=ssh.recv(1000)
+			buff += resp
+			if re.search("\[sudo\] +password +for",resp):
+				if  UseKey=='Y':
+					print "您使用PublicKey登陆，无法sudo，因为您可能没有sudo密码"
+				else:
+					if one_sudo:
+						ssh.send("%s\r"%Password)
+						usesudop=True
+						one_sudo=False
+						continue
+					else:
+						print "sudo 密码不正确",Password
+						break
+				
+				break
+			else:
+				if  re.search("###@@@$", resp):
+					Result_status=True
+                			All_Servers_num_Succ+=1
+					break
+		t.close()
+		if Result_status:
+			All_Servers_num += 1
+			if usesudop:
+				buff='\n'.join(buff.split('\r\n')[4:][:-1])+'\n'
+			else:
+				buff='\n'.join(buff.split('\r\n')[3:][:-1])+'\n'
+			ResultSum=buff + "\n\033[1m\033[1;32m+OK %s (%0.2f Sec All %d Done %d)\033[1m\033[0m\n" % (s,float(time.time() - start_time),All_Servers_num_all,All_Servers_num)
+			
+		else:
+			All_Servers_num += 1
+			FailIP.append(s)
+			buff=''
+			ResultSum=buff + "\n\033[1m\033[1;31m-ERR sudo Failed (Password Error) %s (%0.2f Sec All %d Done %d)\033[1m\033[0m\n" % (s,float(time.time() - start_time),All_Servers_num_all,All_Servers_num)
+			
+	except Exception,e:
+		All_Servers_num += 1
+		Result_status=False
+		FailIP.append(s)
+		ResultSum="\n\033[1m\033[1;31m-ERR %s %s (%0.2f Sec All %d Done %d)\033[1m\033[0m\a"   % (e,s,float(time.time() - start_time),All_Servers_num_all,All_Servers_num)
+	if Result_status:
+		TmpShow=Format_Char_Show.Show_Char(ResultSum+"Time:"+OPTime,0)
+		#WriteSourceLog(TmpShow)
+		print TmpShow
+	else:
+		TmpShow=Format_Char_Show.Show_Char(ResultSum+"Time:"+OPTime,0)
+		#WriteSourceLog(TmpShow)
+		print TmpShow
+	if All_Servers_num_all == All_Servers_num:
+		FailNum=All_Servers_num_all-All_Servers_num_Succ
+		if FailNum>0:
+			FailNumShow="\033[1m\033[1;31mFail:%d\033[1m\033[0m" % (FailNum)
+		else:
+			FailNumShow="Fail:%d" % (FailNum)
+		print "+Done (Succ:%d,%s, %0.2fSec CheungSSH(V:%d) Cheung Kei-Chuen All Right Reserved)" % (All_Servers_num_Succ,FailNumShow,time.time()-Global_start_time,VERSION)
+                All_Servers_num =0
+                All_Servers_num_Succ=0
+		Done_Status='end'
 
 def Excute_cmd_root(s,Port,Username,Password,Passwordroot,cmd,UseLocalScript,OPTime):
-	global All_Servers_num_all,All_Servers_num,All_Servers_num_Succ,Done_Status,bufflog,FailIP
+	global All_Servers_num_all,All_Servers_num,All_Servers_num_Succ,Done_Status,bufflog,FailIP,PWD
+	PWD=re.sub("/{2,}","/",PWD)
 	Done_Status='start'
 	bufflog=''
 	start_time=time.time()
@@ -641,6 +738,9 @@ def Excute_cmd_root(s,Port,Username,Password,Passwordroot,cmd,UseLocalScript,OPT
 		ssh=t.invoke_shell()
 		ssh.send("LANG=zh_CN.UTF-8\n")
 		ssh.send("export LANG\n")
+		if Username=='root':
+			print "不能用root切换su-root"
+			sys.exit()
 		ssh.send("su - root\n")
 		buff=''
 		while not re.search("Password:",buff) and not re.search("：", buff):
@@ -649,35 +749,31 @@ def Excute_cmd_root(s,Port,Username,Password,Passwordroot,cmd,UseLocalScript,OPT
 		ssh.send("%s\n" % (Passwordroot))
 		buff1=''
 		while True:
-			resp=ssh.recv(500)
+			resp=ssh.recv(1000)
 			buff1 += resp
 			if  re.search('su:',buff1):
-				#print "\033[1;31m-ERR su Failed  %s\033[0m" % (s)
 				break
 			else:
-				if re.search('# *$',buff1):
-					Result_status=True
-                			All_Servers_num_Succ+=1
-					break
+				if resp=='\r\n':
+					continue
+				ssh.send("PS1='###@@@'\n")
+				Result_status=True
+                		All_Servers_num_Succ+=1
+				break
 		if Result_status:
-			ssh.send(PWD)
-			ssh.send("%s\n" % (cmd))
+			ssh.send("%s\n" % (PWD+cmd))
 			buff=""
 			bufflog=''
-			RootCmdGetBack_i=1
 			while True:
 				resp=ssh.recv(9999)
-				if RootCmdGetBack_i==1:
-					RootCmdGetBack_i=2
-					continue
-				resp=re.sub(cmd+"\r\n","",resp)
-				if resp.endswith("# "):
+				if re.search("###@@@$",resp):
 					break
 				else:
 					buff  += resp
 					bufflog  += resp.strip('\r\n') + '\\n'
 			t.close()
 			All_Servers_num += 1
+			buff='\n'.join(buff.split('\r\n')[3:])
 			ResultSum=buff + "\n\033[1m\033[1;32m+OK %s (%0.2f Sec All %d Done %d)\033[1m\033[0m\n" % (s,float(time.time() - start_time),All_Servers_num_all,All_Servers_num)
 			
 			bufflog_new=''
@@ -689,7 +785,8 @@ def Excute_cmd_root(s,Port,Username,Password,Passwordroot,cmd,UseLocalScript,OPT
 		else:
 			All_Servers_num += 1
 			FailIP.append(s)
-			ResultSum=buff + "\n\033[1m\033[1;31m-ERR Su Failed %s (%0.2f Sec All %d Done %d)\033[1m\033[0m\n" % (s,float(time.time() - start_time),All_Servers_num_all,All_Servers_num)
+			buff=''
+			ResultSum=buff + "\n\033[1m\033[1;31m-ERR Su Failed (Password Error) %s (%0.2f Sec All %d Done %d)\033[1m\033[0m\n" % (s,float(time.time() - start_time),All_Servers_num_all,All_Servers_num)
 			
 	except Exception,e:
 		All_Servers_num += 1
@@ -735,6 +832,8 @@ def Excute_cmd():
 	FailIP=[];LastCMD=[]
 	if Useroot=="Y":
 		CmdPrompt="CheungSSH root"
+	elif sudo=='Y':
+		CmdPrompt="CheungSSH sudo"
 	else:
 		CmdPrompt="CheungSSH"
 	while True:
@@ -820,7 +919,7 @@ def Excute_cmd():
 				PWD=PWD
 			else:
 				PWD="cd %s;" % PWD
-		if re.search("^ *[Rr][Uu][Nn]",cmd):
+		if re.search("^ *[Rr][Uu][Nn] +",cmd):
 			try:
 				ScriptFilePath=cmd.split()[1]
 				if not os.path.isfile(ScriptFilePath):
@@ -885,12 +984,13 @@ def Excute_cmd():
 			elif re.search("^ *[Ss][Ee][Ll][Ee][Cc][Tt] *",cmd):
 				try:
 					SelectFailIP=cmd.split()[1]
-					T=re.search("[Ff] *|[Aa][Ii][Ll] *",SelectFailIP)
+					T=re.search("[Ff][Aa][Ii][Ll] *",SelectFailIP)
 					if T:
 						if not FailIP:
 							print "当前没有执行命令失败的主机,无法选定"
 						else:
 							Servers_T=FailIP
+							print "已选定执行命令[%s]失败的主机%s" %(LastCMD,FailIP)
 						continue
 				except IndexError:
 					print  "您尚未选定主机 select 主机地址"
@@ -983,8 +1083,13 @@ def Excute_cmd():
 			print "\033[1;33m当前没有设定服务器地址,或者选定的主机组中的服务器列表为空\033[0m"
 			continue
 		if re.search("^ *vim? +",cmd):
+			try:
+				EditFile=cmd.split()[1]
+			except Exception,e:
+				print "没有指定文件"
+				continue
 			if not os.path.isfile("/cheung/flag/.NoAskEdit"):
-				AskEdit=raw_input("您当前要编辑远程服务器上的文件，编辑完成后，所有服务器上的[%s]都将是您本次编辑的内容且内容一样。您是否同意这样的行为(yes/no)? ")
+				AskEdit=raw_input("您当前要编辑远程服务器上的文件，编辑完成后，所有服务器上的[%s]都将是您本次编辑的内容且内容一样。您是否同意这样的行为(yes/no)? " %EditFile)
 				if not re.search("^ *[Yy]([Ee][Ss])? *$",AskEdit):
 					print "忽略本次操作[%s]"% cmd
 					continue
@@ -999,7 +1104,6 @@ def Excute_cmd():
 							
 			try:
 						
-				EditFile=cmd.split()[1]
 				FileFlag=EditFile +str(random.randint(999999999,999999999999))
 				for a in Servers_T:
 					if UseKey=='Y':
@@ -1047,9 +1151,17 @@ def Excute_cmd():
 					a.start()
 				else:
 					if UseKey=="Y":
-						a=threading.Thread(target=SSH_cmd,args=(s,ServersUsername[s],None,ServersPort[s],Newcmd,UseLocalScript,OPTime))
+						if sudo=='Y':
+							a=threading.Thread(target=Excute_sudo,args=(s,ServersPort[s],ServersUsername[s],ServersPassword[s],Newcmd,UseLocalScript,OPTime))
+						else:
+							a=threading.Thread(target=SSH_cmd,args=(s,ServersUsername[s],None,ServersPort[s],Newcmd,UseLocalScript,OPTime))
 					else:
-						a=threading.Thread(target=SSH_cmd,args=(s,ServersUsername[s],ServersPassword[s],ServersPort[s],Newcmd,UseLocalScript,OPTime))
+						if sudo=='Y':
+				
+							a=threading.Thread(target=Excute_sudo,args=(s,ServersPort[s],ServersUsername[s],ServersPassword[s],Newcmd,UseLocalScript,OPTime))
+						else:
+						
+							a=threading.Thread(target=SSH_cmd,args=(s,ServersUsername[s],ServersPassword[s],ServersPort[s],Newcmd,UseLocalScript,OPTime))
 
 					a.start()
 					
@@ -1062,7 +1174,10 @@ def Excute_cmd():
 				else:
 					if Deployment=='Y':
 						ListenLog="""if [ ! -r %s ] ; then echo -e '\033[1m\033[1;31m-ERR ListenFile %s  not exists,so do not excute commands !\033[1m\033[0m\a ' 1>&2 ;exit;else nohup tail -n 0 -f  %s  2&>%s &   fi;""" % (ListenFile,ListenFile,ListenFile,DeploymentFlag)
-					SSH_cmd(s,ServersUsername[s],ServersPassword[s],ServersPort[s],Newcmd,UseLocalScript,OPTime)
+					if sudo=='Y':
+						Excute_sudo(s,ServersPort[s],ServersUsername[s],        ServersPassword[s],Newcmd,UseLocalScript,OPTime)
+					else:
+						SSH_cmd(s,ServersUsername[s],ServersPassword[s],ServersPort[s],Newcmd,UseLocalScript,OPTime)
 							
 			############################################################################################
 if  __name__=='__main__':

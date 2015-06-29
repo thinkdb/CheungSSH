@@ -15,14 +15,8 @@ def Get_Char(Char,i):
 	
 def Show_Line(Max_Char_Len,i=0,Flag='end'):
 	T=''
-	while i<=Max_Char_Len+2:
-		if i<=5 and Flag=='start':
-			#sys.stdout.write('+')
-			T+='+'
-			i+=1
-			continue
-		
-		#sys.stdout.write('-')
+	LEN=commands.getoutput("echo $COLUMNS")
+	while i<=int(LEN)-1:
 		T+='-'
 		i+=1
 	return T
