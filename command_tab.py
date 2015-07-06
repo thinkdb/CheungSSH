@@ -2,6 +2,7 @@
 #coding:utf8
 import readline,os,commands,sys
 readline.set_completer_delims(' \t\n`~!@#$%^&*()=+[{]}\\|;:\'",<>/?')
+HOME=commands.getoutput('''echo "$HOME"''')
 def allcommands():
     a=commands.getoutput("PATH=$PATH:./:/usr/lib:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/cheung/bin;for c in $(echo $PATH |sed 's/:/ /g');do ls $c;done")
     return a.strip().split('\n')
@@ -44,7 +45,10 @@ class BufferAwareCompleter(object):
                     else:
                         if origline.endswith(' '):words.append('')  
                         basedir,basefile = os.path.split(words[-1])
-                        candidates = alllocalpath(basedir)
+			if words[0].lower()=="select":
+				candidates=alllocalpath("%s/cheung/data/hosts/"%HOME)
+			else:
+                        	candidates = alllocalpath(basedir)
                         being_completed = basefile
  
                     if being_completed: 

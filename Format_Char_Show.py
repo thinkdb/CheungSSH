@@ -29,7 +29,6 @@ def Show_Char(New_Char,Color_Status):
 		Color_Start="\033[1;31m"
 		Color_End="\033[0m"
 	New_Char=New_Char
-	AllChar+='\n\n'
 	Len_and_Char=Get_Char(New_Char,i=0)
 	AllChar+=Color_Start
 	AllChar+=Show_Line(Len_and_Char[0],i=0,Flag='start') + '\n'

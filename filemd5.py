@@ -1,15 +1,17 @@
 #!/usr/bin/python
-import hashlib
-import sys 
+try:
+	import hashlib,sys
+except Exception,e:
+	print e
+	sys.exit(1)
 
 def main(filename):
     m = hashlib.md5()
-    with open(filename, 'rb') as fp: 
-        while True:
-            blk = fp.read(4096) # 4KB per block
-            if not blk: break
-            m.update(blk)
-    #print m.hexdigest(), filename
+    fp=open(filename, 'rb')
+    while True:
+     blk = fp.read(4096) # 4KB per block
+     if not blk: break
+     m.update(blk)
     return  m.hexdigest()
 
 if __name__ == '__main__':
