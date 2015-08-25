@@ -1,4 +1,5 @@
 # CheungSSH
+#请到https://github.com/zhangqichuan/CheungSSH/ 下载最新版本
 比Ansibel更好用的自动化工具
 Web版本主要设计与实现：
      张其川先生
