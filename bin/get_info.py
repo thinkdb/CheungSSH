@@ -8,8 +8,8 @@ server_info=cheungssh_web.Read_config()
 reload(sys)
 sys.setdefaultencoding('utf8')
 import random
-def get_info():
-	info={"msgtype":1,"content":[]}
+def get_info(msgtype=1):
+	info={"msgtype":msgtype,"content":[]}
 	for ip in server_info[-1]:
 		for g in server_info[2]:
 			if ip in server_info[2][g]:

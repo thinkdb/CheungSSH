@@ -1,6 +1,7 @@
 #!/bin/bash
 #Author=Cheung Kei-Chuen
 #QQ=2418731289
+#coding:utf-8
 #如果您在使用过程中，遇到了一点点的问题，我都真诚希望您能告诉我！为了改善这个软件， 方便您的工作#
 export LANG=zh_CN.UTF-8
 if [ `id -u` -ne 0 ]
@@ -269,14 +270,14 @@ then
 	echo "首次安装，您的系统可能还没有配置，请您检查配置文件(~/cheung/conf/hosts)"
 	read -p "按下Enter进入配置文件..." t
 	vi ~/cheung/conf/hosts
-	echo "如果配置正确，您可以直接用/root/cheung/bin/start_CheungSSH_web.sh 进行启动CheungSSH web系统"
+	echo "如果配置正确，您可以直接用/root/cheung/bin/web_server.sh 进行启动CheungSSH web系统"
 	exit 1
 fi
 ps -fel|grep websocket_server_cheung.py|awk '{print $4}'|xargs -i kill  -9 {} 2>/dev/null
 netstat -anlut|grep LISTEN|grep '0.0.0.0:1337' >/dev/null
 if [ $? -eq 0 ]
 then
-	echo -e "系统存在残余进程，请手动清除!\n清除后可手动执行 sh ~/cheung/bin/start_CheungSSH_web.sh 启动"
+	echo -e "系统存在残余进程，请手动清除!\n清除后可手动执行 sh ~/cheung/bin/web_server.sh 启动"
 	exit 1
 fi
 nohup python websocket_server_cheung.py >>~/cheung/logs/web_run.log  2>&1 &

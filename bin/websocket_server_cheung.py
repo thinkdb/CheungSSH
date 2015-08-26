@@ -280,14 +280,12 @@ class WebSocket(threading.Thread):#继承Thread
 
 
             else:
-                #global g_code_length
                 global g_header_length
 		mm=''
 		try:
 			while True:
-				self.conn.settimeout(2)
+				self.conn.settimeout(0.5)
 				mm+=self.conn.recv(1024)
-				
 		except Exception:
 			pass
                 if len(mm) <= 0:
