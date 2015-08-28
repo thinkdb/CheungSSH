@@ -12,8 +12,7 @@ then
         echo "您的~/cheung/bin目录没有CheungSSH web启动程序，请cd切换到目标路径后再行启动本程序!"
         exit 1
 fi
-case $1 in
-start)
+start(){
 	pid=`cat ~/cheung/pid/cheungssh.pid 2>/dev/null`
 	kill -9 $pid 2>/dev/null
 	netstat -anlut|grep  '0.0.0.0:1337' -q
@@ -41,7 +40,7 @@ start)
 		t_md5=`md5sum ~/cheung/conf/hosts|awk '{print  $1}'`
 		if [ ${now_md5} != ${t_md5} ]
 		then
-			python ~/cheung/bin/sendinfo.py '<script type="text/javascript">alert("系统检测到配置文件发生变化，请您手动重启~/cheung/bin/start_CheungSSH_web.sh")</script>' >/dev/null
+			python ~/cheung/bin/sendinfo.py '<script type="text/javascript">alert("系统检测到配置文件发生变化，请您手动重启 ~/cheung/bin/web_server.sh restart")</script>' >/dev/null
 			cat <<EOFsend|python
 import sendinfo,get_info
 info={"""all""":"""%s"""% (str(get_info.get_info(2)))}
@@ -53,6 +52,22 @@ EOFsend
 		sleep 1
 	done &
 	echo  $! >~/cheung/flag/check.pid
+}
+status(){
+	pid=`cat ~/cheung/pid/cheungssh.pid 2>/dev/null`
+	if [ ! -z $pid ] && [ `ps -fel|awk  -v pid=$pid  '{if($4==pid){print "yes";exit}}'` == "yes" ]
+	then
+		echo "CheungSSH Web pid($pid)  is running ..."
+		exit 0
+	else
+		echo "No runing"
+		exit 2
+	fi
+	
+}
+case $1 in
+	start)
+		start
 	;;
 stop)
         pid=`cat ~/cheung/pid/cheungssh.pid 2>/dev/null`
@@ -66,6 +81,9 @@ stop)
                 echo "已停止"
         fi
 	;;
+	status)
+		status
+		;;
 restart)
 	start
 	;;

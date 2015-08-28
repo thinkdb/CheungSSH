@@ -7,7 +7,8 @@ find  ~/cheung/flag -type f  -exec rm -f {} \;
 find  ~/cheung/version -type f  -exec rm -f {} \;
 rm -f ~/cheung/logs/*
 rm -fr ~/cheung/data/*
-touch ~/cheung/flag/test ~/cheung/version/test ~/cheung/data/test ~/cheung/logs/test
+rm -f ~/cheung/pid/*
+touch ~/cheung/flag/test ~/cheung/version/test ~/cheung/data/test ~/cheung/logs/test  ~/cheung/pid/
 cat >~/cheung/conf/hosts<<EOF
 [Hosts-Group1]
 #主机地址===端口===登陆账户===登陆密码===su-root密码

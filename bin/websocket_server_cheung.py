@@ -262,7 +262,6 @@ class WebSocket(threading.Thread):#继承Thread
                     #print first_info,555555555555
                     sendMessage(first_info)
                     #sendMessage(unicode("""<script type="text/javascript">alert("欢迎使用CheungSSH Web版本! QQ:2418731289")</script>""").encode('utf-8'))  #像浏览器发送消息
-                    #del get_info
                     i=1
                     #print self.buffer_utf8
                     #sendMessage('开始接收...')  #像浏览器发送消息
@@ -274,7 +273,7 @@ class WebSocket(threading.Thread):#继承Thread
 			T=sendMessage(info)
 			if T=='Error':
 				print "断开接收通道"
-				#deleteconnection(str(self.index))
+				deleteconnection(str(self.index))
 				break
 				
 

@@ -98,7 +98,8 @@ RunMode=M
 	except Exception,e:
 		VerR=0
 	if VerR<VERSION:
-		os.system("sh Corpration.sh 2>/dev/null")
+		#os.system("sh Corpration.sh 2>/dev/null")
+		pass
 	if VerR<104:
 		T=open('%s/cheung/conf/cheung.conf'%HOME,'w')
 		T.write("""[CheungSSH]

@@ -9,7 +9,6 @@ then
 	echo "Must be as root install!"
 	exit 1
 fi
-
 echo  "Installing..."
 mkdir -p ~/cheung/
 cat <<EOFver|python
@@ -165,7 +164,7 @@ fi
 cd ~/cheung/bin
 if [ $? -ne 0 ]
 then
-        echo  -e "无法cd 到~/cheung/bin下面\n请确保您把cheung目录付昂到您了的宿主下面!"
+        echo  -e "无法cd 到~/cheung/bin下面\n请确保您把cheung目录复制到您了的宿主目录下面!"
         exit 1
 fi
 
@@ -185,12 +184,6 @@ then
 		echo "抱歉，您没有输入IP，退出安装,安装失败"
 	fi
 fi
-#python ~/cheung/bin/cheungssh_web.py "id -u" "all"
-#if [ $? -ne 0 ]
-#then
-#        echo "有报错，您的CheungSSH没有正确配置，无法启动web系统"
-#        exit 1
-#else
 		read  -p  "现在需要把web目录复制到您的http服务所在路径下，请输入您的http服务根(/)路径所在位置 (默认是/var/www/html/): " path
 		if  [ -z $path ]
 		then
@@ -215,7 +208,7 @@ fi
 				echo "您的指定的目录不存在"
 				exit 1
 			else
-				yes|cp -fr ~/cheung/web/cheungssh $path
+				yes|cp -fr  ../web/cheungssh/  $path
 				if [ $? -ne 0 ]
 				then
 					echo "复制失败"
@@ -249,7 +242,7 @@ fi
 			then
 				echo "您的指定的目录不存在";exit 1
 			else
-				yes|cp -fr ~/cheung/web/cheungssh $cgi_path
+				yes|cp -fr  ../web/cheungssh/ $cgi_path
 				if [ $? -ne 0 ]
 				then
 					echo "复制失败"; exit 1
@@ -264,10 +257,10 @@ fi
 yes|cp -fr /tmp/conf ~/cheung/ 2>/dev/null
 
 sed -i "s#ws:.*1337#ws://$ip:1337#g" ${path}/cheungssh/index.html
-sed -i "s#http://.*/cgi-bin#/cgi-bin#g" /var/www/html/cheungssh/index.html
+sed -i "s#http://.*/cgi-bin#/cgi-bin#g" ${path}/cheungssh/index.html
 if  [ $? -ne 0 ]
 then
-	echo "初始化IP失败， 请把您的$/path/cheung/index.html中的IP地址修改成您的当前主机ip"
+	echo "初始化IP失败， 请把您的$path/cheung/index.html中的IP地址修改成您的当前主机ip"
 	exit 1
 fi
 echo "安装完成!"
@@ -278,7 +271,19 @@ then
 	echo "首次安装，您的系统可能还没有配置，请您检查配置文件(~/cheung/conf/hosts)"
 	read -p "按下Enter进入配置文件..." t
 	vi ~/cheung/conf/hosts
-	echo "如果配置正确，您可以直接用/root/cheung/bin/web_server.sh 进行启动CheungSSH web系统"
+	netstat -anlut|grep LISTEN|grep '0.0.0.0:1337' >/dev/null
+	if [ $? -eq 0 ]
+	then
+		echo "系统早已启动"
+		exit 1
+	fi
+	echo "正在启动web系统[命令 ~/cheung/bin/web_server.sh start]"
+	sh ~/cheung/bin/web_server.sh start
+	if  [ $? -ne 0 ]
+	then
+		echo "无法启动，请检查配置!"
+		exit 1
+	fi
 	exit 1
 fi
 ps -fel|grep websocket_server_cheung.py|awk '{print $4}'|xargs -i kill  -9 {} 2>/dev/null
