@@ -177,6 +177,14 @@ then
 fi
 which httpd 2>/dev/null
 ip=`ifconfig |grep -v 'inet6'|grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}' -o|grep -vE '^(127|255)|255$'|head -1`
+if [ -z $ip ]
+then
+	read -p "抱歉，无法获取您的本机IP地址，请您手动输入您的服务器IP地址 " ip
+	if [ -z $ip ]
+	then
+		echo "抱歉，您没有输入IP，退出安装,安装失败"
+	fi
+fi
 #python ~/cheung/bin/cheungssh_web.py "id -u" "all"
 #if [ $? -ne 0 ]
 #then
