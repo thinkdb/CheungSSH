@@ -55,7 +55,7 @@ EOFsend
 }
 status(){
 	pid=`cat ~/cheung/pid/cheungssh.pid 2>/dev/null`
-	if [ ! -z $pid ] && [ `ps -fel|awk  -v pid=$pid  '{if($4==pid){print "yes";exit}}'` == "yes" ]
+	if [[ ! -z $pid ]] && [[ `ps -fel|awk  -v pid=$pid  '{if($4==pid){print "yes";exit}}'` == "yes" ]]
 	then
 		echo "CheungSSH Web pid($pid)  is running ..."
 		exit 0
