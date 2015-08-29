@@ -1,6 +1,7 @@
 #!/bin/bash
 #Author=Cheung Kei-Chuen
 #QQ=2418731289
+#coding:utf-8
 #如果您在使用过程中，遇到了一点点的问题，我都真诚希望您能告诉我！为了改善这个软件， 方便您的工作#
 export LANG=zh_CN.UTF-8
 if [ `id -u` -ne 0 ]
@@ -8,9 +9,8 @@ then
 	echo "Must be as root install!"
 	exit 1
 fi
-
 echo  "Installing..."
-
+mkdir -p ~/cheung/
 cat <<EOFver|python
 #coding:utf-8
 import sys,time
@@ -126,10 +126,9 @@ fi
 	
 
 
-chmod -R a+x CheungSSH*  2>/dev/null
-chmod a+x *.py 2>/dev/null
-cp *py ~/cheung/bin/ 2>/dev/null
-cp *sh ~/cheung/bin/ 2>/dev/null
+chmod a+x *.py  2>/dev/null
+chmod a+x *.sh  2>/dev/null
+yes|cp -fr ../* ~/cheung/ 2>/dev/null
 echo 'PATH=$PATH:~/cheung/bin' >>/etc/profile
 . /etc/profile
 echo "恭喜，您已经安装好了环境，接下来请您使用 ./cheungssh.py 启动程序,然后在提示符中输入操作系统命令比如： whoami "
@@ -148,8 +147,8 @@ else
 fi
         if [ ! -d ~/cheung/ ]
         then
-                yes|cp -fr ../../cheung ~/
-                yes|cp -fr ../../cheung/conf /tmp/
+                yes|cp -fr ../ ~/ 2>/dev/null
+                yes|cp -fr ../conf /tmp/  2>/dev/null
                 if [ $? -ne 0 ]
                 then
                         echo "请把../../cheung目录复制到您的宿主目录下运行!"
@@ -158,20 +157,14 @@ fi
                         echo "已经把当前程序包复制到~/下面"
                 fi
         else
-                yes|rm -fr /tmp/conf
-                yes|cp -fr  ~/cheung/conf /tmp/
-                if [ $? -ne  0 ]
-                then
-                        echo  "备份原始配置失败"
-                else
-                        echo "备份配置成功"
-                fi
+                yes|rm -fr /tmp/conf 2>/dev/null
+                yes|cp -fr  ~/cheung/conf /tmp/ 2>/dev/null
         fi
 
 cd ~/cheung/bin
 if [ $? -ne 0 ]
 then
-        echo  -e "无法cd 到~/cheung/bin下面\n请确保您把cheung目录付昂到您了的宿主下面!"
+        echo  -e "无法cd 到~/cheung/bin下面\n请确保您把cheung目录复制到您了的宿主目录下面!"
         exit 1
 fi
 
@@ -183,12 +176,14 @@ then
 fi
 which httpd 2>/dev/null
 ip=`ifconfig |grep -v 'inet6'|grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}' -o|grep -vE '^(127|255)|255$'|head -1`
-#python ~/cheung/bin/cheungssh_web.py "id -u" "all"
-#if [ $? -ne 0 ]
-#then
-#        echo "有报错，您的CheungSSH没有正确配置，无法启动web系统"
-#        exit 1
-#else
+if [ -z $ip ]
+then
+	read -p "抱歉，无法获取您的本机IP地址，请您手动输入您的服务器IP地址 " ip
+	if [ -z $ip ]
+	then
+		echo "抱歉，您没有输入IP，退出安装,安装失败"
+	fi
+fi
 		read  -p  "现在需要把web目录复制到您的http服务所在路径下，请输入您的http服务根(/)路径所在位置 (默认是/var/www/html/): " path
 		if  [ -z $path ]
 		then
@@ -213,7 +208,7 @@ ip=`ifconfig |grep -v 'inet6'|grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}' -o|grep -vE 
 				echo "您的指定的目录不存在"
 				exit 1
 			else
-				yes|cp -fr ~/cheung/web/cheungssh $path
+				yes|cp -fr  ../web/cheungssh/  $path
 				if [ $? -ne 0 ]
 				then
 					echo "复制失败"
@@ -227,6 +222,7 @@ ip=`ifconfig |grep -v 'inet6'|grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}' -o|grep -vE 
 		 if  [ -z $cgi_path ]
 		then
 			cgi_path="/var/www/cgi-bin/"
+			chmod a+x ../web/cheungssh/path_search.cgi
 			if [ ! -d $cgi_path ]
 			then
 				echo "您的系统不存在$cgi_path目录,可能是因为您没有安装Apahce的原因导致的"
@@ -246,7 +242,7 @@ ip=`ifconfig |grep -v 'inet6'|grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}' -o|grep -vE 
 			then
 				echo "您的指定的目录不存在";exit 1
 			else
-				yes|cp -fr ~/cheung/web/cheungssh $cgi_path
+				yes|cp -fr  ../web/cheungssh/ $cgi_path
 				if [ $? -ne 0 ]
 				then
 					echo "复制失败"; exit 1
@@ -261,10 +257,10 @@ ip=`ifconfig |grep -v 'inet6'|grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}' -o|grep -vE 
 yes|cp -fr /tmp/conf ~/cheung/ 2>/dev/null
 
 sed -i "s#ws:.*1337#ws://$ip:1337#g" ${path}/cheungssh/index.html
-sed -i "s#http://.*/cgi-bin#/cgi-bin#g" /var/www/html/cheungssh/index.html
+sed -i "s#http://.*/cgi-bin#/cgi-bin#g" ${path}/cheungssh/index.html
 if  [ $? -ne 0 ]
 then
-	echo "初始化IP失败， 请把您的$/path/cheung/index.html中的IP地址修改成您的当前主机ip"
+	echo "初始化IP失败， 请把您的$path/cheung/index.html中的IP地址修改成您的当前主机ip"
 	exit 1
 fi
 echo "安装完成!"
@@ -275,14 +271,26 @@ then
 	echo "首次安装，您的系统可能还没有配置，请您检查配置文件(~/cheung/conf/hosts)"
 	read -p "按下Enter进入配置文件..." t
 	vi ~/cheung/conf/hosts
-	echo "如果配置正确，您可以直接用/root/cheung/bin/start_CheungSSH_web.sh 进行启动CheungSSH web系统"
+	netstat -anlut|grep LISTEN|grep '0.0.0.0:1337' >/dev/null
+	if [ $? -eq 0 ]
+	then
+		echo "系统早已启动"
+		exit 1
+	fi
+	echo "正在启动web系统[命令 ~/cheung/bin/web_server.sh start]"
+	sh ~/cheung/bin/web_server.sh start
+	if  [ $? -ne 0 ]
+	then
+		echo "无法启动，请检查配置!"
+		exit 1
+	fi
 	exit 1
 fi
 ps -fel|grep websocket_server_cheung.py|awk '{print $4}'|xargs -i kill  -9 {} 2>/dev/null
 netstat -anlut|grep LISTEN|grep '0.0.0.0:1337' >/dev/null
 if [ $? -eq 0 ]
 then
-	echo -e "系统存在残余进程，请手动清除!\n清除后可手动执行 sh ~/cheung/bin/start_CheungSSH_web.sh 启动"
+	echo -e "系统存在残余进程，请手动清除!\n清除后可手动执行 sh ~/cheung/bin/web_server.sh 启动"
 	exit 1
 fi
 nohup python websocket_server_cheung.py >>~/cheung/logs/web_run.log  2>&1 &

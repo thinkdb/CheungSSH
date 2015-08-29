@@ -5,7 +5,7 @@
 VERSION=130
 import os,sys
 import commands
-HOME=commands.getoutput('''echo "$HOME"''')
+HOME=os.path.expanduser('~')
 import sendinfo
 os.sys.path.insert(0,os.path.abspath('./'))
 os.sys.path.insert(0,os.path.abspath('%s/cheung/bin/'%HOME))
@@ -15,7 +15,6 @@ except Exception,e:
 	print "\033[1m\033[1;31m-ERR %s\033[0m\a"	% (e)
 	sys.exit(1)
 reload(sys)
-HOME=commands.getoutput('''echo "$HOME"''')
 SysVersion=float(sys.version[:3])
 sys.setdefaultencoding('utf8')
 LogFile='%s/cheung/logs/cheungssh.log' %HOME

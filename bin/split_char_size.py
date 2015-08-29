@@ -5,9 +5,9 @@ def split_char_size(char):
 	nowchar=''
 	char_list=[]
 	while char:
-		if len(char)>=10000:
-			nowchar=char[:10000]
-			char = char[10000:]
+		if len(char)>=5000:
+			nowchar=char[:5000]
+			char = char[5000:]
 		else:
 			nowchar = char
 			char=''

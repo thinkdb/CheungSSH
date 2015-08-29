@@ -98,7 +98,8 @@ RunMode=M
 	except Exception,e:
 		VerR=0
 	if VerR<VERSION:
-		os.system("sh Corpration.sh 2>/dev/null")
+		#os.system("sh Corpration.sh 2>/dev/null")
+		pass
 	if VerR<104:
 		T=open('%s/cheung/conf/cheung.conf'%HOME,'w')
 		T.write("""[CheungSSH]
@@ -126,6 +127,7 @@ RunMode=M
 #127.0.0.1===22===root===None===None
 #locallhost===22222===root===Your-root's-password===su-root的密码,如果没有使用Useroot，此列也可以填写None
 #None的特殊指定只能针对密码特别指定，不能在账户名，或者是端口，主机这三列中使用
+#比如你想要1.1.1.1重复出现， 那么可以给1.1.1.1定义一个主机名a.com， 然后分别用1.1.1.1 和a.com区分
 #注意:在每一个配置中，请不要有空格或者是制表符!
 #在所有的配置列中，请用三个等于（===）分割开，并确保有5列！""")
 		T.close()
