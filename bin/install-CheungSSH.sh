@@ -222,33 +222,19 @@ fi
 		 if  [ -z $cgi_path ]
 		then
 			cgi_path="/var/www/cgi-bin/"
-			chmod a+x ../web/cheungssh/path_search.cgi
-			if [ ! -d $cgi_path ]
-			then
-				echo "您的系统不存在$cgi_path目录,可能是因为您没有安装Apahce的原因导致的"
-				exit 1
-			else
-				echo $cgi_path
-				yes|cp -fr ~/cheung/web/cheungssh/path_search.cgi $cgi_path
-				if [ $? -ne 0 ]
-				then
-					echo "复制失败";exit 1
-				else
-					echo "复制cgi成功"
-				fi
-			fi
+		fi
+		chmod a+x ../web/cheungssh/*.cgi
+		if [ ! -d $cgi_path ]
+		then
+			echo -e "您的系统不存在$cgi_path目录,可能是因为您没有安装Apahce的原因导致的\n请确保目录存在后重新安装"
+			exit 1
 		else
-			if [ ! -d $cgi_path ]
+			yes|cp -fr ../web/cheungssh/*.cgi $cgi_path
+			if [ $? -ne 0 ]
 			then
-				echo "您的指定的目录不存在";exit 1
+				echo "复制失败";exit 1
 			else
-				yes|cp -fr  ../web/cheungssh/ $cgi_path
-				if [ $? -ne 0 ]
-				then
-					echo "复制失败"; exit 1
-				else
-					echo "复制成功"
-				fi
+				echo "复制cgi成功"
 			fi
 		fi
 #fi	
