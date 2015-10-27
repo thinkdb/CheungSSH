@@ -320,7 +320,7 @@ EOF
 		else
 			echo "赋权完成"
 		fi
-		/home/cheungssh/bin/cheungssh-service.sh start
+		sh /home/cheungssh/bin/cheungssh-service.sh start
 		if  [ $? -ne 0 ]
 		then
 			echo  -e "\n\n启动HTTP方式 /home/cheungssh/bin/cheungssh-service.sh start"
