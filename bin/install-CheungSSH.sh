@@ -92,9 +92,7 @@ if [ $? -ne 0 ]
 then
 	echo  "使用Yum安装..."
 	/bin/cp  -f /home/cheungssh/conf/*repo  /etc/yum.repos.d/
-	yum clean all   ;   yum makecache
-	yum install  -y python-pip 2>/dev/null
-	yum install  -y gcc python-devel openssl-devel mysql-devel  swig httpd httpd-devel
+	yum install  -y gcc python-devel openssl-devel mysql-devel  swig httpd httpd-devel python-pip
 	if  [ $? -ne 0 ]
 	then
 		echo "安装失败,请检查网络"
@@ -204,6 +202,7 @@ EOF
 show databases;
 EOF
 			fi
+			mcmd="mysql -h${mip} -u${musername}  -p${mpassword} -P${mp}"
 			if  [ $? -ne 0 ]
 			then
 				echo  $mcmd
