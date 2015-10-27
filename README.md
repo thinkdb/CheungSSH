@@ -1,5 +1,4 @@
 # CheungSSH
-#目前该版本是shell版本， 预计在2015-10-21正式发布Web2.0
 比Ansibel更好用的自动化工具
 比Ansibel更好用的自动化工具 Web版本主要设计与实现： 张其川先生 覃亚东先生
 请下载本软件包后，进入到bin目录执行./install-CheungSSH.sh 安装
