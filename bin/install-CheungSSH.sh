@@ -328,6 +328,7 @@ EOF
 		fi
 		clear
 		
+		echo  -e "\n\t\t\t请使用谷歌浏览器登陆! 或者360的急速模式"
 		echo -e "\n\t安装CheungSSH完毕，请使用:\n\t默认用户名: cheungssh\n\t密码: cheungssh\n\t登录:http://$IP/cheungssh/"
 		echo  -e "\n\n启动CheungSSH服务命令:\n\t\t /home/cheungssh/bin/cheungssh-service.sh start"
 		###
