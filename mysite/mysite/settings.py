@@ -90,7 +90,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-	'/home/cheungssh/web/cheungSSH/static/',
+	'/home/cheungssh/web/cheungssh/static/',
 )
 ################
 # List of finder classes that know how to find static files in
@@ -131,7 +131,7 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 TATIC_URL='/static/'
 
 TEMPLATE_DIRS = (
-    '/home/cheungssh/web/cheungSSH/',
+    '/home/cheungssh/web/cheungssh/',
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
