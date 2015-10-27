@@ -1,0 +1,102 @@
+<div style="height: 100%;">
+    <div class="col-md-3" style="padding:0 15px;height: 100%" ng-scrollbar scrollbar-x="false" scrollbar-y="true"
+         scrollbar-config="{autoResize:true,show:true}">
+        <div style="padding: 10px;">
+            <button class="btn btn-primary" ng-click="allSelected?unSelectAll():selectAll();" ng-model="allSelected"
+                    bs-checkbox>全选/反选
+            </button>
+        </div>
+        <div class="panel-group" data-allow-multiple="true" data-start-collapsed="false" role="tablist"
+             aria-multiselectable="true" bs-collapse>
+            <div class="panel panel-default repeat" ng-repeat="panel in groupServerTree">
+                <div class="panel-heading" style="cursor:pointer;" role="tab" ng-click="panel.active = !panel.active"
+                     bs-collapse-toggle>
+                <span class="glyphicon" ng-class="{true:'glyphicon-plus',false:'glyphicon-minus'}[!!panel.active]"
+                      style="float:left;margin-right: 10px;"></span>
+                <span style="float:right;" ng-class="{
+                            'glyphicon-unchecked':!panel.selected,
+                            'glyphicon-check':panel.selected
+                            }" class="glyphicon"
+                      ng-click="panel.selected = !panel.selected;$event.stopPropagation();toggleSelectAll(panel.children,panel.selected);"></span>
+                    <h4 class="panel-title">
+                        <a>
+                            {{ panel.name}}&nbsp;&nbsp;&nbsp;&nbsp;<span class="badge">{{panel.children.length}}</span>
+                        </a>
+                    </h4>
+                </div>
+                <div class="panel-collapse" role="tabpanel" bs-collapse-target>
+                    <!-- List group -->
+                    <ul class="list-group">
+                        <li class="list-group-item repeat" ng-click="item.selected = !item.selected"
+                            ng-repeat="item in panel.children" ng-class="{true:'masget-read'}[item.readflag]"
+                            style="cursor:pointer;">
+                        <span style="position: absolute;top:10px;right: 10px;" ng-class="{
+                        'glyphicon-unchecked':!item.selected,
+                        'glyphicon-check':item.selected
+                        }" class="glyphicon"></span>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{item.ip}}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <form name="downloadForm" class="col-md-9" style="padding:0 15px;height: 100%;" ng-scrollbar scrollbar-x="false"
+          scrollbar-y="true"
+          scrollbar-config="{autoResize:true,show:true}">
+        <div style="padding: 15px 0;">
+            <div class="col-sm-12">
+                <span style="font-weight: bolder;font-size: 20px;">从左边面板选择服务器</span>
+            </div>
+            <div ng-repeat="server in groupServerList" ng-if="server.selected" class="col-sm-12 repeat clearfix"
+                 style="padding: 5px 10px;position: relative;">
+                <div class="col-sm-10">
+                    <div class="input-group">
+                    <span class="input-group-addon" style="width:130px;">
+                    <div style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;width:105px;" title="{{server.ip}}">{{server.ip}}</div>
+                        </span>
+                        <input type="text" class="form-control" name="sourceFile_{{index}}" ng-model="server.sourceFile" style="width: 300px;"
+                               required
+                               placeholder="远程服务器文件路径" data-animation="am-flip-x"
+                               ng-options="path as path for path in getPaths($viewValue)" bs-typeahead>
+
+                        <div style="display: inline-block;position: absolute;font-size: 32px;"
+                             ng-messages="downloadForm.sourceFile_{{index}}.$error">
+                            <div style="color: red;" ng-message="required">*</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="progress" style="margin-bottom:0px;height: 34px;display:none;">
+                        <div id="progressBar_{{$index}}" class="progress-bar progress-bar-striped active"
+                             role="progressbar" style="width: 0%;padding:8px 0;color: white;">
+                        </div>
+                    </div>
+                <span class="glyphicon glyphicon-ok-sign"
+                      style="position:absolute;top:5px;left:-10px;color: green;font-size: 20px;display:none;"
+                      data-content-Template="../static/template/popover/okMsg.html" data-container="body"
+                      data-html="true" data-trigger="hover" data-placement="top" data-delay="200" data-hover-hold="true"
+                      bs-popover></span>
+                    <span class="glyphicon glyphicon-remove-sign"
+                          style="position:absolute;top:5px;left:-10px;cursor:pointer;color: red;font-size: 20px;display:none;"
+                          data-content-Template="../static/template/popover/errorMsg.html" data-container="body"
+                          data-html="true" data-trigger="hover" data-placement="top" data-delay="200"
+                          data-hover-hold="true" bs-popover></span>
+                </div>
+            </div>
+            <div class="col-sm-8 col-sm-push-2" style="padding: 10px 20px;">
+                <button class="btn btn-primary" data-loading-text="下载中,请稍候..." ng-disabled="downloadForm.$invalid"
+                        ng-click="downloadToWeb($event);">
+                    立即下载至服务器
+                </button>
+                <button class="btn btn-primary" data-loading-text="下载中,请稍候..." ng-disabled="downloadForm.$invalid"
+                        ng-click="scheduleDownload($event,'download');">
+                    加入计划任务
+                </button>
+                <button ng-click="downloadToLocal();" class="btn btn-primary" ng-hide="firstAccess"
+                        style="font-weight:700;margin-left:50px;padding: 5px 20px;">打包下载到本地
+                </button>
+            </div>
+        </div>
+    </form>
+</div>

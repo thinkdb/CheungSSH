@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name=”renderer” content=”webkit”>
+    <title>cheungSSH</title>
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../static/css/motion.css"/>
+    <link rel="stylesheet" href="../static/css/common.css"/>
+    <style type="text/css">
+        .nav {
+            margin: 10px 0;
+        }
+
+        #labels ul li {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .list-group-item ul li {
+            padding: 2px 5px;
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .panel-heading {
+            cursor: pointer;
+        }
+
+        .panel-heading .list-group-item {
+            background-color: #9563B5;
+        }
+
+        .panel-body .list-group-item {
+            background-color: #D8E6DF;
+            height: 28px;
+            font-size: 14px;
+            font-weight: bolder;
+        }
+
+        div.panel-body {
+            display: table;
+        }
+
+        div.col-md-2 {
+            vertical-align: middle;
+            display: table-cell;
+        }
+
+        ul li img {
+            width: 100%;
+            height: 100%;
+        }
+
+        .popover {
+            max-width: 1440px !important;
+        }
+    </style>
+</head>
+<body style="background-color: #ECD8D8;overflow: hidden;" ng-app="cheungSSH">
+<div class="alert-container" style="z-index:-1;position:fixed;top: 0px;left: 0px;bottom: 0px;right: 0px;"></div>
+<div style="width: 100%;height: 100%;">
+    <div class="nav navbar navbar-fixed-top" style="height: 45px;text-align: center;margin: 0;">
+        <div style="float:left;background-color: #9563B5;margin: 10px;padding: 5px 10px;font-weight: bolder;color: #C0CA3F;">
+            服务器状态:&nbsp;<span id="mess" style="color: #12BD18;">正在连接...</span></div>
+        <div class="input-group col-md-6 col-md-push-1" style="padding: 5px;">
+            <input id="sendMsg" type="text" class="form-control">
+                <span class="input-group-btn">
+                <button id="sendBtn" class="btn btn-default masget-btn-default" type="button" style="color: bisque;background-color: #9563B5;"
+                        data-loading-text="执行中...">执行
+                </button>
+                </span>
+                <span class="input-group-btn" style="padding-left:40px;">
+                <button id="chooseServers" class="btn btn-warning" data-toggle="modal" data-target="#myModal" style="color: bisque;background-color: #9563B5;"
+                        title="默认:全部">选择服务器
+                </button>
+                </span>
+        </div>
+
+        <div id="labels" style="padding: 10px;width: 100%;display:inline-block;">
+        </div>
+    </div>
+    <div id="contentPanel" style="overflow: auto;height: 300px;padding-top:100px;">
+    <span id="clearContent" class="glyphicon glyphicon-remove-sign"
+          style="position:absolute;right:12px;top:102px;z-index:1000;cursor:pointer;float:right;font-size: 20px;"></span>
+        </span>
+        <div class="content" style="margin: 0 10px;height: 100%;border: 1px solid #808080;" ng-scrollbar scrollbar-x="false" scrollbar-y="true"
+             scrollbar-config="{autoResize:true,show:true}">
+            <div id="content"
+                 style="width: 100%;height:100%;position:absolute;top:0px;">
+            </div>
+        </div>
+    </div>
+
+    <div id="serversGroup" style="width: 100%;position: absolute;" class="navbar navbar-fixed-bottom">
+        <div class="progress" style="display: none;margin-bottom:0px;">
+            <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="45" aria-valuemin="0"
+                 aria-valuemax="100" style="width: 0%;min-width:2em;">
+                0%
+            </div>
+        </div>
+        <div class="panel panel-default am-fade-and-slide-bottom" style="margin-bottom:0px;color: #900A0A;">
+            <div class="panel-heading clearfix" style="padding: 0 0;margin: 0 0;color: #DEB5B5;">
+                <div class="col-md-12 list-group" style="padding: 0 0;margin: 0 0;height: 40px;">
+                    <div class="col-md-2 list-group-item"
+                         style="text-align: center;font-weight: bold;">主机组
+                    </div>
+                    <div class="col-md-10 list-group-item"
+                         style="text-align: center;font-weight: bold;">服务器
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body list-group" style="width:100%;margin: 0 0;padding: 0 0;background-color: #D8E6DF;">
+            </div>
+            <div class="panel-footer" style="background-color: #D8E6DF;border-top: 1px solid #DDDDDD;">
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="display:none;">
+            </div>
+            <div class="modal-body clearfix">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="confirmChoose">确认</button>
+                <button type="button" class="btn btn-default masget-btn-default" data-dismiss="modal" id="cancelChoose">
+                    取消
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../static/js/jquery.min.js"></script>
+<script src="../static/js/bootstrap.js"></script>
+<script src="../static/js/bootstrap-typeAhead.js"></script>
+<script src="../static/js/underscore.js"></script>
+<script type="text/template" id="tpl">
+    <% for(var i = 0; i < content.length; i++) { %>
+    <% var groupItem = content[i]%>
+    <div class="col-md-12 list-group-item" style="padding: 0 0;margin: 0 0;" group="<%=groupItem.group%>">
+        <div class="col-md-2" style="font-weight: bold;text-align: center;padding: 5px 0;">
+            <%=groupItem.group%>
+        </div>
+        <div class="col-md-10" style="padding: 0 0;border-left: 1px solid #DDDDDD;">
+            <ul style="list-style: none;margin-bottom: 0px;">
+                <% for(var j = 0; j < groupItem.servers.length; j++) { %>
+                <% var item = groupItem.servers[j]%>
+                <li style="width: 30px;height: 24px;" class="status" data-toggle="popover"
+                    data-placement="auto top" data-container="body" data-trigger="manual"
+                    serverIp="<%=groupItem.group+'_'+item.ip%>"
+                    data-html="true"
+                    data-content="<div style='max-height:300px;overflow:auto;'><p>IP地址：<%=item.ip%></p><p>状态：<%=item.status%></p><p>描述：<%=item.info%></p></div>">
+                    <img src="static/img/<%=item.status == " OK"?"green":item.status == "ERR"?"red":"grey"%>.png">
+                </li>
+                <% } %>
+            </ul>
+        </div>
+    </div>
+    <% } %>
+</script>
+
+<script type="text/template" id="tplModal">
+    <span id="selectAllServers" class="glyphicon glyphicon-unchecked"></span><label>&nbsp;&nbsp;选择所有主机</label>
+    <% for(var i = 0; i < content.length; i++) { %>
+    <% var groupItem = content[i]%>
+    <div class="col-md-12 list-group-item" style="padding: 0 0;margin: 0 0;" group="<%=groupItem.group%>">
+        <div class="col-md-3 modal-group" style="font-weight:bolder;padding: auto;word-break: break-all;">
+            <span class="glyphicon glyphicon-unchecked"></span><label>&nbsp;&nbsp;全选</label>
+
+            <p><%=groupItem.group%></p>
+        </div>
+        <div class="col-md-9 modal-server" style="padding: 0 0;border-left: 1px solid #DDDDDD;">
+            <ul style="list-style: none;margin-bottom: 0px;">
+                <% for(var j = 0; j < groupItem.servers.length; j++) { %>
+                <% var item = groupItem.servers[j]%>
+                <li>
+                    <span class="glyphicon glyphicon-unchecked"></span><label>&nbsp;&nbsp;<%=item.ip%></label>
+                </li>
+                <% } %>
+            </ul>
+        </div>
+    </div>
+    <% } %>
+</script>
+<script>
+var tags = [];
+var tpl = $("#tpl").html();
+var tplModal = $("#tplModal").html();
+var render = _.template(tpl);
+var renderModal = _.template(tplModal);
+var serversGroupInit = false;
+var initialData = null;
+var progress = 0;
+var currentPopover = null;
+var mousePointerInPopover = false;
+var t;
+var selectservers = [], toRemovedServers = [];
+
+function enter(element) {
+    element.addClass("ng-enter");
+    element.addClass("ng-enter-active");
+    $(".panel-body", element).css({display: "block"});
+    setTimeout(function () {
+        element.removeClass("ng-enter ng-enter-active");
+        element.removeClass("ng-enter ng-enter-active");
+        resetHeight();
+    }, 300);
+}
+
+function leave(element) {
+    element.addClass("ng-leave");
+    element.addClass("ng-leave-active");
+    setTimeout(function () {
+        $(".panel-body", element).css({display: "none"});
+        element.removeClass("ng-leave ng-leave-active");
+        resetHeight();
+    }, 300);
+}
+
+if (window.WebSocket) {
+    var mess = $("#mess");
+    var ws = new WebSocket('ws://192.168.87.250:1337');
+    ws.onopen = function (e) {
+        mess.html("连接成功");
+    }
+    ws.onclose = function (e) {
+        mess.html("服务器已关闭");
+    }
+    ws.onerror = function () {
+        mess.html("连接出错");
+    }
+    ws.onmessage = function (e) {
+        if (e.data == "Starting") {
+            $("#state").html("开始接收...");
+            return;
+        }
+        if (e.data == "Done") {
+            $("#state").html("接收完成");
+            $("#sendBtn").button("reset");
+            return;
+        }
+        try {
+            var data = e.data;
+            var evalData = eval("(" + e.data + ")");
+        } catch (e) {
+            $("#content").html($("#content").html() + data + "<br/>");
+            $("#content")[0].scrollTop = $("#content")[0].scrollHeight;
+            return;
+        }
+
+        if (evalData) {
+            if (!serversGroupInit) {
+                if (evalData.msgtype == 1) {
+                    $("#serversGroup .panel-body").html(render(evalData));
+                    $(".modal-body").html(renderModal(evalData));
+                    $('[data-toggle="popover"]').popover().mouseenter(function () {
+                        clearTimeout(t);
+                        currentPopover && currentPopover.destroy();
+                        $(this).popover();
+                        currentPopover = $(this).data("bs.popover");
+                        currentPopover.show();
+                        currentPopover.$tip.mouseleave(function () {
+                            currentPopover.destroy();
+                        })
+                    }).mouseleave(function (e) {
+                        t = setTimeout(function () {
+                            if (!mousePointerInPopover)
+                                currentPopover.destroy();
+                        }, 200);
+                    });
+                    resetHeight();
+                    $("#selectAllServers").click(function () {
+                        if ($(this).hasClass("glyphicon-unchecked")) {
+                            $(this).removeClass("glyphicon-unchecked").addClass("glyphicon-check");
+                            $(".modal-server .glyphicon").removeClass("glyphicon-unchecked").addClass("glyphicon-check");
+                            ;
+                            $(".modal-group .glyphicon").removeClass("glyphicon-unchecked").addClass("glyphicon-check");
+                            ;
+                        } else {
+                            $(this).removeClass("glyphicon-check").addClass("glyphicon-unchecked");
+                            $(".modal-server .glyphicon").removeClass("glyphicon-check").addClass("glyphicon-unchecked");
+                            $(".modal-group .glyphicon").removeClass("glyphicon-check").addClass("glyphicon-unchecked");
+                        }
+                    })
+
+                    $(".modal-server .glyphicon").each(function () {
+                        selectservers.push($(this).next().text().trim());
+                    })
+
+                    $(".modal-group .glyphicon").click(function () {
+                        if ($(this).hasClass("glyphicon-unchecked")) {
+                            $(this).removeClass("glyphicon-unchecked").addClass("glyphicon-check");
+                            $(".glyphicon", $(this).parent().siblings()).removeClass("glyphicon-unchecked").addClass("glyphicon-check");
+                            ;
+                        } else {
+                            $(this).removeClass("glyphicon-check").addClass("glyphicon-unchecked");
+                            $(".glyphicon", $(this).parent().siblings()).removeClass("glyphicon-check").addClass("glyphicon-unchecked");
+                        }
+                    });
+
+                    $(".modal-server .glyphicon").click(function () {
+                        if ($(this).hasClass("glyphicon-unchecked")) {
+                            $(this).removeClass("glyphicon-unchecked").addClass("glyphicon-check");
+                        } else {
+                            $(this).removeClass("glyphicon-check").addClass("glyphicon-unchecked");
+                        }
+                    });
+
+                    $("#confirmChoose").click(function () {
+                        selectservers = [];
+                        toRemovedServers = [];
+                        $("#serversGroup .panel-body").html(render(initialData));
+                        $('[data-toggle="popover"]').unbind().mouseenter(function () {
+                            clearTimeout(t);
+                            currentPopover && currentPopover.destroy();
+                            $(this).popover();
+                            currentPopover = $(this).data("bs.popover");
+                            currentPopover.show();
+                            currentPopover.$tip.mouseleave(function () {
+                                currentPopover.destroy();
+                            })
+                        }).mouseleave(function (e) {
+                            t = setTimeout(function () {
+                                if (!mousePointerInPopover)
+                                    currentPopover.destroy();
+                            }, 200);
+                        });
+                        $(".modal-server .glyphicon").each(function () {
+                            var serverName = $(this).next().text().trim();
+                            var groupName = $(this).closest(".modal-server").siblings().children("p").text().trim();
+                            if ($(this).hasClass("glyphicon-check")) {
+                                selectservers.push(serverName);
+                                if ($("[serverIp='" + groupName + "_" + serverName + "']")[0].style.visibility == "hidden") {
+                                    $("[serverIp='" + groupName + "_" + serverName + "']").css("visibility", "visible");
+                                }
+                            } else {
+                                toRemovedServers.push(groupName + "_" + serverName);
+                            }
+                        });
+                        $("#cancelChoose").click();
+                        $.each(toRemovedServers, function (key, item) {
+                            $("[serverIp='" + item + "']").css("visibility", "hidden");
+                        })
+                    });
+
+                    serversGroupInit = true;
+                    initialData = evalData;
+                }
+            } else {
+                if (evalData.msgtype == 1) {
+                    var group = evalData.content[0].group;
+                    var server = evalData.content[0].servers[0];
+                    var $server = $("[serverIp='" + group + "_" + server.ip + "']");
+                    if (typeof $server.data("info") == "undefined") $server.data("info", "");
+                    if (evalData.id.indexOf("Done") == -1) {
+                        $server.data("info", $server.data("info") + server.info);
+                        return;
+                    } else {
+                        $server.data("info", $server.data("info") + server.info);
+                        var $group = $("[group='" + group + "']");
+                        $server.attr("data-content", "<div style='max-height:300px;overflow:auto;'><p>IP地址：" + server.ip + "</p><p>状态：" + server.status + "</p><p>描述：" + $server.data("info") + "</p></div>");
+                        $("img", $server).attr("src", "static/img/" + (server.status == "UNSTART" ? "grey" : server.status == "OK" ? "green" : "red") + ".png");
+                        $server.unbind().mouseenter(function () {
+                            clearTimeout(t);
+                            currentPopover && currentPopover.destroy();
+                            $(this).popover();
+                            currentPopover = $(this).data("bs.popover");
+                            currentPopover.show();
+                            currentPopover.$tip.mouseleave(function () {
+                                currentPopover.destroy();
+                            })
+                        }).mouseleave(function (e) {
+                            t = setTimeout(function () {
+                                if (!mousePointerInPopover)
+                                    currentPopover.destroy();
+                            }, 200);
+                        });
+                        resetHeight();
+                        if (!$(".progress").is(":visible")) $(".progress").css({display: "block"});
+                        $(".progress-bar").clearQueue();
+                        $(".progress-bar").animate({width: server.jindu + "%"}, "fast", function () {
+                            $(".progress-bar").text(server.jindu + "%");
+                            progress = server.jindu;
+                            if (server.jindu == 100) {
+                                setTimeout(function () {
+                                    $(".progress").css({display: "none"});
+                                    $(".progress-bar").css({width: "0%"});
+                                    $(".progress-bar").text("0%");
+                                    resetHeight();
+                                }, 100);
+                            }
+                        });
+                        $("#content").html($("#content").html() + $server.data("info") + "<br/>");
+                        $("#content")[0].scrollTop = $("#content")[0].scrollHeight;
+                        $server.removeData("info");
+                    }
+                }
+            }
+        }
+    }
+
+    function getKeys(obj) {
+        var keys = [];
+        for (var key in obj) {
+            if (key) {
+                keys.push(key)
+            }
+            return keys;
+        }
+        return [0];
+    }
+
+
+    function setSelectionRange(input, selectionStart, selectionEnd) {
+        if (input.setSelectionRange) {
+            input.focus();
+            input.setSelectionRange(selectionStart, selectionEnd);
+        }
+        else if (input.createTextRange) {
+            var range = input.createTextRange();
+            range.collapse(true);
+            range.moveEnd('character', selectionEnd);
+            range.moveStart('character', selectionStart);
+            range.select();
+        }
+    }
+
+    function setCaretToPos(input, pos) {
+        setSelectionRange(input, pos, pos);
+    }
+
+    function trim(s) {
+        return s.replace(/(^\s*)|(\s*$)/g, '');
+    }
+}
+
+function initTags() {
+    var tagsWrapper = $("<ul></ul>");
+    $('#labels').append(tagsWrapper);
+    $.each(tags, function (key, item) {
+        var newLabel = $('<li class="pull-left"><span class="label label-primary" style="background-color: #9563B5;padding: 10px;margin: 5px;position: relative;">' + item + '&nbsp;&nbsp;&nbsp;<span class="glyphicon glyphicon-remove-sign" style="position: absolute;right: 3px;"></span></span></li>');
+        newLabel.click(function () {
+            $("#sendMsg").val(trim(item));
+        });
+        $(".label .glyphicon-remove-sign", newLabel).click(function () {
+            $(this).parent().parent().remove();
+        });
+        $('#labels ul').append(newLabel);
+    })
+}
+
+function resetHeight() {
+    $("#contentPanel").css({height: (document.body.scrollHeight - $("#serversGroup")[0].clientHeight) + "px"});
+}
+
+function getBrowser() {
+
+    var Sys = {};
+    var ua = navigator.userAgent.toLowerCase();
+    var s;
+    (s = ua.match(/msie ([\d.]+)/)) ? Sys.ie = s[1] : (s = ua
+            .match(/firefox\/([\d.]+)/)) ? Sys.firefox = s[1] : (s = ua
+            .match(/chrome\/([\d.]+)/)) ? Sys.chrome = s[1] : (s = ua
+            .match(/opera.([\d.]+)/)) ? Sys.opera = s[1] : (s = ua
+            .match(/version\/([\d.]+).*safari/)) ? Sys.safari = s[1]
+            : 0;
+    // ie
+    if (Sys.ie) {
+        return "ie";
+    }
+    if ("ActiveXObject" in window) {
+        Sys.ie = "ie 11";
+        return "ie";
+    }
+    // firefox
+    if (Sys.firefox) {
+        return "Firefox";
+    }
+    // Chrome
+    if (Sys.chrome) {
+        return "Chrome";
+    }
+    // Opera
+    if (Sys.opera) {
+        return "Opera";
+    }
+    // Safari
+    if (Sys.safari) {
+        return "Safari";
+    }
+}
+var cmdData;
+$(function () {
+    if (getBrowser() != "Chrome") $alert("真真建议您使用谷歌（Chrome）浏览器。如果您使用的是360浏览器，请手动切换到极速模式。");
+
+    $.ajax({
+        type: "GET",
+        url: "http://192.168.87.250/cgi-bin/path_search.cgi?ifconfig&callback=abc&123",
+        dataType: "jsonp",
+        success: function (data) {
+            $alert("xxxx");
+        },
+        fail: function () {
+            alert("搜索系统没有正确工作，请确认path_search.cgi程序 在您的cgi-bin目录中，并且拥有x执行权限");
+        },
+        error: function () {
+            alert("搜索系统没有正确工作，请确认path_search.cgi程序 在您的cgi-bin目录中，并且拥有x执行权限");
+        }
+    });
+
+    $("#sendMsg").focus();
+    resetHeight();
+    window.onresize = resetHeight;
+    initTags();
+    $('#sendMsg').typeahead({
+        source: function (query, process) {
+            $.ajax({
+                type: "GET",
+                url: "http://192.168.87.250/cgi-bin/path_search.cgi?" + query,
+                dataType: "jsonp",
+                success: function (data) {
+                    process(data);
+                }
+            });
+        },
+        updater: function (item) {
+            return item;
+        }
+    });
+
+    $("#serversGroup .panel-heading").click(function () {
+        $this = $("#serversGroup .panel")
+        $("#serversGroup .panel-body").is(":visible") ? leave($this) : enter($this);
+    })
+    $("#sendBtn").click(function () {
+        if (ws.readyState == 1) {
+            if ($("#sendMsg").val() == '') {
+                alert("请先输入!");
+                return;
+            }
+            ws.send(JSON.stringify({
+                selectserver: selectservers.join(","),
+                cmd: $("#sendMsg").val()
+            }));
+            if (!$(".progress").is(":visible")) $(".progress").css({display: "block"});
+            resetHeight();
+            $("#sendBtn").button("loading");
+            $('[data-toggle="popover"]').each(function () {
+                var content = $(this).attr("data-content");
+                $(this).children().attr("src", "static/img/grey.png");
+                $(this).attr("data-content", content.replace(/<p>状态：.*?<\/p>/, "<p>状态：starting</p>"));
+            })
+            var sendMsg = $("#sendMsg").val();
+            if (tags.indexOf(sendMsg.trim()) == -1) {
+                var newLabel = $('<li  class="pull-left"><span class="label label-primary" style="background-color: #9563B5;padding: 10px;margin: 5px;position: relative;">' + $("#sendMsg").val() + '&nbsp;&nbsp;&nbsp;<span class="glyphicon glyphicon-remove-sign" style="position: absolute;right: 3px;"></span></span></li>');
+                newLabel.click(function () {
+                    $("#sendMsg").val(trim($(this).text()));
+                });
+                $(".label .glyphicon-remove-sign", newLabel).click(function () {
+                    $(this).parent().parent().remove();
+                });
+                $('#labels ul').append(newLabel);
+                tags.push(sendMsg.trim());
+            }
+            $("#sendMsg").val("");
+        } else {
+            alert("连接不可用");
+        }
+    });
+
+    $("#sendMsg").keyup(function (e) {
+        var b = document.all ? window.event : event;
+        return 13 == b.keyCode && $("#sendBtn").attr("disabled") != "disabled" ? ($("#sendBtn").click(), !1) : void 0
+    });
+
+    $("#clearContent").click(function () {
+        $("#content").html("");
+    })
+
+    $("#content").focus(function (event) {
+        var e = event.target;
+
+        if (trim(e.value) == "")
+            $(this).val("");
+        setCaretToPos(e, trim(e.value).length);
+    });
+
+    $(document).click(function (e) {
+        if ($(e.target).parents(".popover-content").length == 0 && currentPopover)
+            currentPopover.destroy();
+    })
+
+    $(document).mousemove(_.throttle(mouseMoveHandler, 100));
+
+    function mouseMoveHandler(e) {
+        mousePointerInPopover = ($(e.target).parents(".popover").length > 0);
+    }
+
+    resizeWindow();
+})
+
+function resizeWindow() {
+    if (window.screen) {//判断浏览器是否支持window.screen判断浏览器是否支持screen
+        var myw = screen.availWidth;   //定义一个myw，接受到当前全屏的宽
+        var myh = screen.availHeight;  //定义一个myw，接受到当前全屏的高
+        window.moveTo(0, 0);           //把window放在左上脚
+        window.resizeTo(myw, myh);     //把当前窗体的长宽跳转为myw和myh
+    }
+}
+</script>
+</body>
+</html>

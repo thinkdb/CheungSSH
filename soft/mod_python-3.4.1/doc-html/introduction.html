@@ -1,0 +1,179 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Introduction &mdash; Mod_python v3.4.1-3.4.1 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '3.4.1-3.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/sidebar.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="copyright" title="Copyright" href="copyright.html" />
+    <link rel="top" title="Mod_python v3.4.1-3.4.1 documentation" href="index.html" />
+    <link rel="next" title="Installation" href="installation.html" />
+    <link rel="prev" title="Mod_python Documentation" href="contents.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="contents.html" title="Mod_python Documentation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="contents.html">Mod_python v3.4.1-3.4.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="introduction">
+<span id="id1"></span><h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="performance">
+<span id="id2"></span><h2>Performance<a class="headerlink" href="#performance" title="Permalink to this headline">¶</a></h2>
+<p>One of the main advantages of mod_python is the increase in
+performance over traditional CGI. Below are results of a very crude
+test. The test was done on a 1.2GHz Pentium machine running Red Hat
+Linux 7.3. <a class="reference external" href="http://httpd.apache.org/docs-2.0/programs/ab.html">Ab</a>
+was used to poll 4 kinds of scripts, all of which imported the
+standard cgi module (because this is how a typical Python cgi script
+begins), then output a single word <tt class="docutils literal"><span class="pre">'Hello!'</span></tt>. The results are
+based on 10000 requests with concurrency of 1:</p>
+<div class="highlight-python"><pre>Standard CGI:               23 requests/s
+Mod_python cgihandler:     385 requests/s
+Mod_python publisher:      476 requests/s
+Mod_python handler:       1203 requests/s</pre>
+</div>
+</div>
+<div class="section" id="apache-http-server-api">
+<span id="apache-api"></span><h2>Apache HTTP Server API<a class="headerlink" href="#apache-http-server-api" title="Permalink to this headline">¶</a></h2>
+<p>Apache processes requests in <em>phases</em> (i.e. read the request, parse
+headers, check access, etc.). Phases are implemented by
+functions called <em>handlers</em>. Traditionally, handlers are written in C
+and compiled into Apache modules. Mod_python provides a way to extend
+Apache functionality by writing Apache handlers in Python. For a
+detailed description of the Apache request processing process, see the
+<a class="reference external" href="http://httpd.apache.org/docs/2.4/developer/">Apache Developer Documentation</a>, as well as the
+<a class="reference external" href="http://www.modpython.org/python10/">Mod_python - Integrating Python with Apache</a>
+paper.</p>
+<p>Currently only a subset of the Apache HTTP Server API is accessible
+via mod_python. It was never the goal of the project to provide a 100%
+coverage of the API. Rather, mod_python is focused on the most useful
+parts of the API and on providing the most &#8220;Pythonic&#8221; ways of using
+it.</p>
+</div>
+<div class="section" id="other-features">
+<span id="intro-other"></span><h2>Other Features<a class="headerlink" href="#other-features" title="Permalink to this headline">¶</a></h2>
+<p>Mod_python also provides a number features that fall in the category
+of web development, e.g. a parser for embedding Python in HTML
+(<a class="reference internal" href="pythonapi.html#pyapi-psp"><em>psp &#8211; Python Server Pager</em></a>), a handler that maps URL space into modules and
+functions (<a class="reference internal" href="handlers.html#hand-pub"><em>Publisher Handler</em></a>), support for session (<a class="reference internal" href="pythonapi.html#pyapi-sess"><em>Session &#8211; Session Management</em></a>)
+and cookie (<a class="reference internal" href="pythonapi.html#pyapi-cookie"><em>Cookie &#8211; HTTP State Management</em></a>) handling.</p>
+<div class="admonition-see-also admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><a class="reference external" href="http://httpd.apache.org/docs/2.4/developer/">Apache HTTP Server Developer Documentation</a></dt>
+<dd>for HTTP developer information</dd>
+<dt><a class="reference external" href="http://www.modpython.org/python10/">Mod_python - Integrating Python with Apache</a></dt>
+<dd>for details on how mod_python interfaces with Apache HTTP Server</dd>
+</dl>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="contents.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Introduction</a><ul>
+<li><a class="reference internal" href="#performance">Performance</a></li>
+<li><a class="reference internal" href="#apache-http-server-api">Apache HTTP Server API</a></li>
+<li><a class="reference internal" href="#other-features">Other Features</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="contents.html"
+                        title="previous chapter">Mod_python Documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="installation.html"
+                        title="next chapter">Installation</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/introduction.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="contents.html" title="Mod_python Documentation"
+             >previous</a> |</li>
+        <li><a href="contents.html">Mod_python v3.4.1-3.4.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; <a href="copyright.html">Copyright</a> 1990-2013, Apache Software Foundation, Gregory Trubetskoy.
+      Last updated on Oct 22, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

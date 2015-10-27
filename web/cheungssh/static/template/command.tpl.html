@@ -1,0 +1,83 @@
+<div style="margin: 0;" class="clearfix">
+    <div class="col-sm-2 text-center" style="font-weight: bolder;color: #C0CA3F;padding: 15px;">
+        <span id="mess" style="color: #12BD18;">{{mess?mess:"正在连接..."}}</span></div>
+    <div class="col-sm-7 text-center">
+        <div class="input-group" style="padding: 5px;">
+            <input id="commandPath" type="text" class="form-control" ng-model="commandPath" ng-keyup="$event.keyCode == 13&&keyup();" required
+                   data-animation="am-flip-x" ng-options="path as path for path in getPaths($viewValue)" style="z-index:0;"
+                   bs-typeahead>
+            <div class="input-group-btn">
+                <button id="commandSendBtn" ng-click="executeCommand($event);" class="btn btn-primary" type="button" ng-disabled="!commandPath||inCommandExecuting">{{inCommandExecuting?'执行中...':'执行'}}
+                </button>
+                <button class="btn btn-primary" ng-disabled="!commandPath||inCommandExecuting"
+                        ng-click="scheduleCommand($event,'command');">
+                    计划任务
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-3 text-left" style="padding: 5px;">
+        <div class="input-group">
+            <button  class="btn btn-primary" data-container="alert-container" ng-click="chooseServers();"
+                    title="默认:全部">选择服务器
+            </button>
+        </div>
+    </div>
+</div>
+<div id="labels" style="padding: 10px;width: 100%;display:inline-block;">
+    <ul style="list-style: none;">
+        <li class="pull-left" ng-repeat="tag in tags"><span ng-click="applyTag(tag);" class="label label-default" style="padding: 10px;margin: 5px;position: relative;cursor:pointer;">{{tag}}&nbsp;&nbsp;&nbsp;<span class="glyphicon glyphicon-remove-sign" style="position: absolute;right: 3px;" ng-click="removeTag(tag);"></span></span></li>
+    </ul>
+</div>
+<div id="commandContentPanel" class="col-md-12" style="overflow: auto;position: absolute;top: 110px;bottom: 140px;">
+        <span id="clearContent" ng-click="clearContent();" class="glyphicon glyphicon-remove-sign"
+              style="position:absolute;right:30px;top:5px;z-index:1000;cursor:pointer;float:right;font-size: 20px;"></span>
+    </span>
+    <div class="content" style="margin: 0 10px;height: 100%;border: 1px solid #808080;" ng-scrollbar
+         scrollbar-x="false" scrollbar-y="true"
+         scrollbar-config="{autoResize:true,show:true}">
+        <div id="realTimeContent"
+             style="width: 100%;">
+        </div>
+    </div>
+</div>
+<div id="commandServersGroup" style="width: 100%;position: absolute; bottom: 0px;">
+    <div class="progress" style="margin-bottom:0px;" ng-show="inProgress">
+        <div id="commandProgress" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="45"
+             aria-valuemin="0"
+             aria-valuemax="100" style="width: 0%;min-width:2em;">
+            0%
+        </div>
+    </div>
+    <div class="panel panel-default" style="margin-bottom: 0px;">
+        <div class="panel-heading clearfix" style="padding: 0 0;" ng-click="showGroupServer = !showGroupServer;resetHeight();">
+            <div class="btn-group btn-group-justified" role="group" aria-label="...">
+                <div class="col-md-2 btn list-group-item serverTable"
+                     style="text-align: center;font-weight: bold;border-bottom-left-radius: 0px;border-bottom:0px;">主机组
+                </div>
+                <div class="col-md-10 btn list-group-item serverTable"
+                     style="text-align: center;font-weight: bold;border-bottom-right-radius: 0px;border-bottom:0px;">服务器
+                </div>
+            </div>
+        </div>
+        <div class="panel-body am-fade-and-slide-bottom" style="padding: 0 0;" ng-if="showGroupServer">
+            <div ng-show="hasSelectedServer(group)" class="btn-group btn-group-justified" ng-repeat="group in groupServerTree" role="group" aria-label="...">
+                <div class="col-md-2 btn list-group-item serverTable" style="border-radius: 0px;cursor:text;padding:3px;">
+                    {{group.name}}
+                </div>
+                <div class="col-md-10 btn list-group-item serverTable" style="padding:7px 10px;border-radius: 0px;cursor:default;padding:3px;">
+                    <ul style="list-style: none;margin-bottom: 0px;padding:0 0;" class="clearfix">
+                        <li style="width: 20px;height: 20px;float:left;cursor:pointer;" class="status" ng-repeat="server in group.children" ng-if="server.selected"
+                            data-container="body" data-trigger="hover" data-delay="200" data-hover-hold="true"
+                            data-html="true" data-placement="top"
+                            data-content-Template="../static/template/popover/serverInfo.html"
+                            bs-popover>
+                            <img ng-src="../static/img/{{server.status == 'OK'?'green.png':server.status == 'ERR'?'red.png':'grey.png'}}" style="width: 12px;">
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

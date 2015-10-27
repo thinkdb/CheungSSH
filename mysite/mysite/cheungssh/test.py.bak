@@ -1,0 +1,7 @@
+from django.http import  HttpResponse
+import auth_check
+@auth_check.auth_check
+def haha(request):
+	return HttpResponse('HA')
+def hahaha(request):
+	return HttpResponse('HAha')

@@ -33,28 +33,6 @@ if int(T_V.replace(".","")) <240:
 	sys.exit(1)
 
 
-def Write_Log(ip,stderr,stdout,Logcmd,LogFile,useroot,username,UseLocalScript,Deployment,DeploymentStatus,OPTime):
-	os.system("chmod 777 %s/cheung/logs/* 2>/dev/null" %HOME)
-	if DeploymentStatus:
-		DeploymentStatus_T='Y'
-	else:
-		DeploymentStatus_T='N'
-	Deployment=Deployment.upper()
-	
-	try:
-		T=open(LogFile,"a")
-		T.write(ip+ '===' + "用户名:" +username  + '===' + "时间:"+OPTime   + '===' + "是否使用su-root:"+useroot + '===' + "是否使用脚本:" + UseLocalScript + '===' + "是否使用部署模式:"+Deployment + '===' +"部署完成状态"+ DeploymentStatus_T + '===' + "命令:"+Logcmd + '===' +"错误显示:"+ stderr + '===' +"正确显示:"+ stdout)
-		T.close()
-	except Exception,e:
-		print "Warning: Can't write log. (%s)" % e
-def WriteSourceLog(MSG):
-	os.system("chmod 777 %s/cheung/logs/* 2>/dev/null" %HOME)
-	try:
-		F=open(SLogFile,"a")
-		F.write(MSG)
-		F.close()
-	except Exception,e:
-		print "Can not write to source log (%s)" % (e)
 def LocalScriptUpload(ip,port,username,password,s_file,d_file):
 	try:		
 		t = paramiko.Transport((ip,port))
@@ -71,71 +49,7 @@ def LocalScriptUpload(ip,port,username,password,s_file,d_file):
 		return False	
 	else:
 		t.close()
-def InitInstall():
-	INITDIR="%s/cheung/logs %s/cheung/flag  %s/cheung/web/cheungssh  %s/cheung/conf %s/cheung/bin %s/cheung/version  %s/cheung/data/hosts" %(HOME,HOME,HOME,HOME,HOME,HOME,HOME)
-	if commands.getstatusoutput("mkdir -p %s 2>/dev/null" % (INITDIR))[0]!=0:
-		print "Create Directory Failed"
-		sys.exit(1)
-	if not os.path.isfile('%s/cheung/conf/cheung.conf'%HOME):
-		T=open('%s/cheung/conf/cheung.conf' % HOME,'w')
-		T.write("""[CheungSSH]
-#Author=Cheung Kei-Chuen
-#QQ=2418731289
-Useroot=N
-RunMode=M
-#请在%s/cheung/cong/hosts中指定主机的账户名，密码，端口等信息
-#Timeout=3
-#sudo=sudo su - root
-#UseKey=N
-#Key的位置默认是在~/.sshd/id_rsa
-#Deployment=N
-#ListenFile=/var/log/messages
-#ListenTime=60
-#ListenChar=Server startup"""%HOME)
-		T.close()
-	try:
-		VerR=int(open("%s/cheung/version/version"%HOME).read().strip())
-	except Exception,e:
-		VerR=0
-	if VerR<VERSION:
-		#os.system("sh Corpration.sh 2>/dev/null")
-		pass
-	if VerR<104:
-		T=open('%s/cheung/conf/cheung.conf'%HOME,'w')
-		T.write("""[CheungSSH]
-#Author=Cheung Kei-Chuen
-#QQ=2418731289
-Useroot=N
-RunMode=M
-#请在%s/cheung/cong/hosts中指定主机信息
-#Timeout=3
-#sudo=sudo su - root
-#UseKey=N
-#Deployment=N
-#ListenFile=/var/log/messages
-#ListenTime=60
-#ListenChar=Server startup"""%HOME)
-		T.close()
-		print "\033[1;33m您使用了新版本，相比之前的老版本在配置上会有所变化，请重新对\n%s/cheung/conf/cheung.conf\n%s/cheung/conf/hosts\n进行配置\a\033[0m" %(HOME,HOME)
-	if not os.path.isfile('%s/cheung/conf/hosts'%HOME):
-		T=open('%s/cheung/conf/hosts'%HOME,'w')
-		T.write("""[Hosts-Group1]
-#主机地址===端口===登陆账户===登陆密码===su-root密码
-#[Hosts-Group2]
-#支持多个主机组
-#如果您担心安全问题，在密码列位置，您可以使用...===None===...表示不在配置文件中指定，而是在您执行命令的时候系统会询问您密码。比如以下配置:
-#127.0.0.1===22===root===None===None
-#locallhost===22222===root===Your-root's-password===su-root的密码,如果没有使用Useroot，此列也可以填写None
-#None的特殊指定只能针对密码特别指定，不能在账户名，或者是端口，主机这三列中使用
-#比如你想要1.1.1.1重复出现， 那么可以给1.1.1.1定义一个主机名a.com， 然后分别用1.1.1.1 和a.com区分
-#注意:在每一个配置中，请不要有空格或者是制表符!
-#在所有的配置列中，请用三个等于（===）分割开，并确保有5列！""")
-		T.close()
-	os.system("""echo %s >%s/cheung/version/version 2>/dev/null"""%(VERSION,HOME))
-
-
-
-def SSH_cmd(ip,username,password,port,cmd,UseLocalScript,OPTime):
+def SSH_cmd(conf):
 	PROFILE=". /etc/profile 2&>/dev/null;. ~/.bash_profile 2&>/dev/null;. /etc/bashrc 2&>/dev/null;. ~/.bashrc 2&>/dev/null;"
 	PATH="export PATH=$PATH:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin;"
 	global All_Servers_num,All_Servers_num_all,All_Servers_num_Succ,Done_Status,Global_start_time,PWD,FailIP
@@ -1225,6 +1139,5 @@ def Excute_cmd():
 							
 			############################################################################################
 if  __name__=='__main__':
-	InitInstall()
 	Read_config()
 	Main_p()

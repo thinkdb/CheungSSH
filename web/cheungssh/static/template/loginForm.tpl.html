@@ -1,0 +1,31 @@
+<!-- BEGIN LOGIN ROW -->
+    <div class="col2 sheet sheet-page" style="margin: 0 auto;">
+            <input style="display:none" id="csrf_token" type="text" value="4aerqFKS-nnfJiPHbQdg9d__J6ctjZ_1q3zk" name="_csrf" data-parsley-id="2866"><ul class="parsley-errors-list" id="parsley-id-2866"></ul>
+
+                <div class="content col4">
+                    <label class="text-left">用户名</label>
+                    <input type="text" name="username" ng-model="username"></ul>
+                </div>
+
+                <div class="content col4">
+                        <div class="col1 content">
+                            <label class="text-left">密码</label>
+                        </div>
+                        <div class="col3 content">
+                            <!--<label class="legend forgot-psw-text text-right" id="forgot-psw-switch" ui-sref="login.forgotPwd">忘记密码?</label>-->
+                        </div>
+                    <input type="password" name="password" ng-model="password"><ul class="parsley-errors-list" id="parsley-id-2260"></ul>
+                </div>
+
+                <div class="col2" style="margin: 0 auto;">
+                    <button type="submit" class="btn btn-primary" ng-click="login();" ng-disabled="logining" style="margin-top:10px;">{{logining?'登录中...':'登录'}}</button>
+                </div>
+    </div>
+
+<!--
+<div class="sign-in">
+    <div class="col2" style="margin:15px auto;">
+        <button class="btn create-account-switch" ui-sref="login.register">创建一个新账户!</button>
+    </div>
+</div>
+-->

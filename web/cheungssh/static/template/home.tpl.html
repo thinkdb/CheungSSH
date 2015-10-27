@@ -1,0 +1,34 @@
+<div style="width:100%;height: 100%;min-width:768px;max-height:1000px;margin-top:5px;padding:0 0;margin: 0 0;" >
+    <div class="cheung-titleBar" style="margin: 0 auto;position: absolute;overflow: hidden;background-color: #36944E;width: 100%;height: 60px;box-shadow: 0 3px 3px rgba(107,96,96,0.5);">
+        <h1 style="margin:0;padding: 15px 50px;font-size: 22px;color: #E6ECF1;float:left;font-family: MicroSoft Yahei;">
+            CheungSSH 自动化运维
+        </h1>
+        <span ng-click="donate();" class="label label-info donate">捐助</span>
+        <span ng-click="loginOut();" class="label label-info loginOut">退出</span>
+    </div>
+    <div class="cheung-leftbar" ng-scrollbar scrollbar-x="false" scrollbar-y="true" scrollbar-config="{autoResize:true,show:true}">
+        <ul class="leftBarMenu">
+            <li ng-repeat="menu in menus" class="repeat">
+                <div id="feature_{{menu.id}}" ng-click="menuClick(menu);" wave-effect ng-class="{true:'active'}[menu.active]" class="menuItem">{{menu.name}}<img ng-if="menu.hasChildren||menu.children" ng-src="../static/hardware/svg/ic_keyboard_arrow_{{menu.collapse?'down':'left'}}_24px.svg"></div>
+                <div id="feature_{{child.id}}" ng-click="menuClick(child);" ng-class="{true:'active'}[child.active]" ng-repeat="child in menu.children" ng-if="menu.collapse" class="menuItemChild repeat" wave-effect>
+                        &nbsp;&nbsp;&nbsp;&nbsp;{{child.name}}
+                </div>
+            </li>
+       </ul>
+    </div>
+    <div id="contentPanel" class="cheung-contentPanel">
+<!--
+            <div style="position: absolute;width: 100%;">
+                <ol class="breadcrumb">
+                <li ng-repeat="nav in navs">文件传输</li>
+            </ol>
+            </div>
+-->
+            <div style="height: 100%;" >
+                    <div class="am-fade" ui-view="contentPanel" style="height: 100%;"></div>
+            </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+</script>

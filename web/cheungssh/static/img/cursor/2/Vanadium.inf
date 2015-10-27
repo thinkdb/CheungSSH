@@ -1,0 +1,60 @@
+; Vanadium
+;	- Win 9x/NT Cursor Scheme installation file.
+
+[Version]
+signature="$CHICAGO$"
+
+[DefaultInstall]
+CopyFiles = Scheme.Cur, Scheme.Txt
+AddReg    = Scheme.Reg
+
+[DestinationDirs]
+Scheme.Cur = 10,"%CUR_DIR%"
+Scheme.Txt = 10,"%CUR_DIR%"
+
+[Scheme.Reg]
+HKCU,"Control Panel\Cursors\Schemes","%SCHEME_NAME%",,"%10%\%CUR_DIR%\%Norm_cur%,%10%\%CUR_DIR%\%Help_cur%,%10%\%CUR_DIR%\%Work_cur%,%10%\%CUR_DIR%\%Busy_cur%,%10%\%CUR_DIR%\%Prcs_cur%,%10%\%CUR_DIR%\%Text_cur%,%10%\%CUR_DIR%\%Hand_cur%,%10%\%CUR_DIR%\%Unav_cur%,%10%\%CUR_DIR%\%Vert_cur%,%10%\%CUR_DIR%\%Horz_cur%,%10%\%CUR_DIR%\%Dgn1_cur%,%10%\%CUR_DIR%\%Dgn2_cur%,%10%\%CUR_DIR%\%Move_cur%,%10%\%CUR_DIR%\%Altr_cur%,%10%\%CUR_DIR%\%Link_cur%"
+
+; -- Common Information
+
+[Scheme.Cur]
+Altr_Vnd.cur
+Busy_Vnd.ani
+Dgn1_Vnd.cur
+Dgn2_Vnd.cur
+Hand_Vnd.cur
+Help_Vnd.ani
+Horz_Vnd.cur
+Link_Vnd.ani
+Move_Vnd.cur
+Norm_Vnd.ani
+Prcs_Vnd.cur
+Text_Vnd.cur
+Unav_Vnd.cur
+Vert_Vnd.cur
+Work_Vnd.ani
+Help_Vnd.cur
+Txt2_Vnd.cur
+Norm_Vnd.cur
+
+[Scheme.Txt]
+Vanadium.txt
+
+[Strings]
+CUR_DIR     = "Cursors\Vanadium"
+SCHEME_NAME = "Vanadium"
+altr_cur    = "Altr_Vnd.cur"
+busy_cur    = "Busy_Vnd.ani"
+dgn1_cur    = "Dgn1_Vnd.cur"
+dgn2_cur    = "Dgn2_Vnd.cur"
+hand_cur    = "Hand_Vnd.cur"
+help_cur    = "Help_Vnd.ani"
+horz_cur    = "Horz_Vnd.cur"
+link_cur    = "Link_Vnd.ani"
+move_cur    = "Move_Vnd.cur"
+norm_cur    = "Norm_Vnd.ani"
+prcs_cur    = "Prcs_Vnd.cur"
+text_cur    = "Text_Vnd.cur"
+unav_cur    = "Unav_Vnd.cur"
+vert_cur    = "Vert_Vnd.cur"
+work_cur    = "Work_Vnd.ani"

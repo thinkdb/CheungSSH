@@ -11,15 +11,13 @@ def Show_Char(Char,Color_Status):
 	Char=Get_Char(Char)
 	AllChar=''
 	if Color_Status==0:
-		Color_Start="""<div style="background:#009100; color:#FFF">"""
-		Color_End="""</div>"""
+		Color_Start=""
+		Color_End=""
 	else:
-		Color_Start="""<div style="background:#D9006C; color:#FFF">"""
+		Color_Start="""<div style="color:red">"""
 		Color_End="""</div>"""
 	AllChar="<pre>"+Color_Start+Char+Color_End+"</pre>"
+	#AllChar="<pre>"+Char+"</pre>"
 	#print AllChar
 	return AllChar
-
-if __name__=='__main__':
-	print Show_Char(sys.argv[1],0)
 

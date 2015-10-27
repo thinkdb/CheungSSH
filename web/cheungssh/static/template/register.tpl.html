@@ -1,0 +1,42 @@
+    <div class="col2 sheet sheet-page" style="margin:0 auto;">
+            <div class="col4 text-center">
+                <span class="sign-up-head">创建你的免费账户!</span>
+            </div>
+
+            <div class="col4" style="margin: 0 auto;">
+
+                <form id="local-signup" action="/user/" method="post" data-parsley-validate="" novalidate="">
+
+                    <input style="display:none" type="text" value="4aerqFKS-nnfJiPHbQdg9d__J6ctjZ_1q3zk" name="_csrf" data-parsley-id="3492"><ul class="parsley-errors-list" id="parsley-id-3492"></ul>
+
+
+                        <div class="content col4 text-left">
+                            <label >用户名</label>
+                            <input type="text" name="username" ng-model="username"><ul class="parsley-errors-list" id="parsley-id-5102"></ul>
+                        </div>
+
+                        <div class="content col4">
+                                <div class="col1 content text-left">
+                                    <label>密码</label>
+                                </div>
+                                <div class="col3 content text-right">
+                                    <label class="legend forgot-psw">最少8个字符</label>
+                                </div>
+                            <input type="password" name="password" ng-model="password"><ul class="parsley-errors-list" id="parsley-id-3302"></ul>
+                        </div>
+
+                        <div class="col2" style="margin: 0 auto;">
+                            <button type="submit" class="btn btn-primary" style="margin-top: 10px;">创建我的账户</button>
+                        </div>
+
+                        <div class="content col4">
+                            <small class="legend">By clicking above, you are agreeing to the <a target="_blank" style="text-decoration:underline" href="https://www.stamplay.com/terms">Terms of Service</a></small>
+                        </div>
+                </form>
+            </div>
+    </div>
+<!-- BEGIN DONT ACCOUNT ROW -->
+    <!-- DONT ACCOUNT CONTENT -->
+    <div class="col2" style="margin: 10px auto;">
+        <button class="btn" ui-sref="login">登录</button>
+    </div>
