@@ -1,0 +1,25 @@
+<div class="clearfix">
+<span id="selectAllServers" class="glyphicon" style="cursor:pointer;" ng-class="{
+                            'glyphicon-unchecked':!allSelected,
+                            'glyphicon-check':allSelected
+                            }" ng-click="allSelected?unSelectAll():selectAll();$event.stopPropagation();" ></span><label>&nbsp;&nbsp;选择所有主机</label>
+    <div class="btn-group btn-group-justified" ng-repeat="group in groupServerTree" role="group" aria-label="...">
+        <div ng-show="group.children&&group.children.length>0;" class="col-md-3 btn list-group-item serverTable" style="border-radius: 0px;cursor:text;">
+                <span class="glyphicon"  style="cursor:pointer;" ng-click="group.selected = !group.selected;$event.stopPropagation();toggleSelectAll(group.children,group.selected);" ng-class="{
+                            'glyphicon-unchecked':!group.selected,
+                            'glyphicon-check':group.selected
+                            }"></span><label>&nbsp;&nbsp;全选</label>
+            <p>{{group.name}}</p>
+        </div>
+        <div ng-show="group.children&&group.children.length>0;" class="col-md-9 btn list-group-item serverTable" style="border-radius: 0px;cursor:default;">
+            <ul style="list-style: none;margin-bottom: 0px;">
+                <li ng-repeat="server in group.children" style="float:left;margin-right:10px;">
+                <span class="glyphicon"  style="cursor:pointer;" ng-click="server.selected = !server.selected" ng-class="{
+                            'glyphicon-unchecked':!server.selected,
+                            'glyphicon-check':server.selected
+                            }"></span><label>&nbsp;&nbsp;{{server.ip}}</label>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

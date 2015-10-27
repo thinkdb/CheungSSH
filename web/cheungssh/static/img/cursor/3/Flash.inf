@@ -1,0 +1,57 @@
+; Flash
+;	- Win 9x/NT Cursor Scheme installation file.
+
+[Version]
+signature="$CHICAGO$"
+
+[DefaultInstall]
+CopyFiles = Scheme.Cur, Scheme.Txt
+AddReg    = Scheme.Reg
+
+[DestinationDirs]
+Scheme.Cur = 10,"%CUR_DIR%"
+Scheme.Txt = 10,"%CUR_DIR%"
+
+[Scheme.Reg]
+HKCU,"Control Panel\Cursors\Schemes","%SCHEME_NAME%",,"%10%\%CUR_DIR%\%Norm_cur%,%10%\%CUR_DIR%\%Help_cur%,%10%\%CUR_DIR%\%Work_cur%,%10%\%CUR_DIR%\%Busy_cur%,%10%\%CUR_DIR%\%Prcs_cur%,%10%\%CUR_DIR%\%Text_cur%,%10%\%CUR_DIR%\%Hand_cur%,%10%\%CUR_DIR%\%Unav_cur%,%10%\%CUR_DIR%\%Vert_cur%,%10%\%CUR_DIR%\%Horz_cur%,%10%\%CUR_DIR%\%Dgn1_cur%,%10%\%CUR_DIR%\%Dgn2_cur%,%10%\%CUR_DIR%\%Move_cur%,%10%\%CUR_DIR%\%Altr_cur%,%10%\%CUR_DIR%\%Link_cur%"
+
+; -- Common Information
+
+[Scheme.Cur]
+Altr_Fsh.cur
+Busy_Fsh.ani
+Dgn1_Fsh.cur
+Dgn2_Fsh.cur
+Hand_Fsh.cur
+Help_Fsh.ani
+Horz_Fsh.cur
+Link_Fsh.ani
+Move_Fsh.cur
+Norm_Fsh.cur
+Prcs_Fsh.ani
+Text_Fsh.ani
+Unav_Fsh.ani
+Vert_Fsh.cur
+Work_Fsh.ani
+
+[Scheme.Txt]
+Flash.txt
+
+[Strings]
+CUR_DIR     = "Cursors\Flash"
+SCHEME_NAME = "Flash"
+altr_cur    = "Altr_Fsh.cur"
+busy_cur    = "Busy_Fsh.ani"
+dgn1_cur    = "Dgn1_Fsh.cur"
+dgn2_cur    = "Dgn2_Fsh.cur"
+hand_cur    = "Hand_Fsh.cur"
+help_cur    = "Help_Fsh.ani"
+horz_cur    = "Horz_Fsh.cur"
+link_cur    = "Link_Fsh.ani"
+move_cur    = "Move_Fsh.cur"
+norm_cur    = "Norm_Fsh.cur"
+prcs_cur    = "Prcs_Fsh.ani"
+text_cur    = "Text_Fsh.ani"
+unav_cur    = "Unav_Fsh.ani"
+vert_cur    = "Vert_Fsh.cur"
+work_cur    = "Work_Fsh.ani"

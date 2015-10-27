@@ -1,0 +1,11 @@
+<div draggable="{{!!draggable}}" ng-scrollbar scrollbar-x="false" scrollbar-y="true" scrollbar-config="{autoResize:true,show:true}"
+     class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" ng-show="title">
+                <button type="button" class="close" ng-click="$hide()">&times;</button>
+                <h4 class="modal-title" ng-bind="title"></h4></div>
+            <div class="modal-body" ng-bind="content"></div>
+        </div>
+    </div>
+</div>

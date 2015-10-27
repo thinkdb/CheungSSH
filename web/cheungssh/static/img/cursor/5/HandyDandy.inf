@@ -1,0 +1,57 @@
+; Handy Dandy
+;	- Win 9x/NT Cursor Scheme installation file.
+
+[Version]
+signature   = "$CHICAGO$"
+
+[DefaultInstall]
+CopyFiles = Scheme.Cur, Scheme.Txt
+AddReg    = Scheme.Reg
+
+[DestinationDirs]
+Scheme.Cur = 10,"%CUR_DIR%"
+Scheme.Txt = 10,"%CUR_DIR%"
+
+[Scheme.Reg]
+HKCU,"Control Panel\Cursors\Schemes","%SCHEME_NAME%",,"%10%\%CUR_DIR%\%Norm_cur%,%10%\%CUR_DIR%\%Help_cur%,%10%\%CUR_DIR%\%Work_cur%,%10%\%CUR_DIR%\%Busy_cur%,%10%\%CUR_DIR%\%Prcs_cur%,%10%\%CUR_DIR%\%Text_cur%,%10%\%CUR_DIR%\%Hand_cur%,%10%\%CUR_DIR%\%Unav_cur%,%10%\%CUR_DIR%\%Vert_cur%,%10%\%CUR_DIR%\%Horz_cur%,%10%\%CUR_DIR%\%Dgn1_cur%,%10%\%CUR_DIR%\%Dgn2_cur%,%10%\%CUR_DIR%\%Move_cur%,%10%\%CUR_DIR%\%Altr_cur%,%10%\%CUR_DIR%\%Link_cur%"
+
+; -- Common Information
+
+[Scheme.Cur]
+Altr_Hnd.cur
+Busy_Hnd.ani
+Dgn1_Hnd.cur
+Dgn2_Hnd.cur
+Hand_Hnd.cur
+Help_Hnd.cur
+Horz_Hnd.cur
+Link_Hnd.cur
+Move_Hnd.cur
+Norm_Hnd.cur
+Prcs_Hnd.cur
+Text_Hnd.cur
+Unav_Hnd.cur
+Vert_Hnd.cur
+Work_Hnd.ani
+
+[Scheme.Txt]
+HndyDndy.txt
+
+[Strings]
+CUR_DIR      = "Cursors\HndyDndy"
+SCHEME_NAME  = "Handy Dandy"
+altr_cur     = "Altr_Hnd.cur"
+busy_cur     = "Busy_Hnd.ani"
+dgn1_cur     = "Dgn1_Hnd.cur"
+dgn2_cur     = "Dgn2_Hnd.cur"
+hand_cur     = "Hand_Hnd.cur"
+help_cur     = "Help_Hnd.cur"
+horz_cur     = "Horz_Hnd.cur"
+link_cur     = "Link_Hnd.cur"
+move_cur     = "Move_Hnd.cur"
+norm_cur     = "Norm_Hnd.cur"
+prcs_cur     = "Prcs_Hnd.cur"
+text_cur     = "Text_Hnd.cur"
+unav_cur     = "Unav_Hnd.cur"
+vert_cur     = "Vert_Hnd.cur"
+work_cur     = "Work_Hnd.ani"

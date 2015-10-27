@@ -194,16 +194,8 @@ then
 			mip=${mip:-localhost}
 			musername=${musername:-root}
 			mp=${mp:-3306}
-			if [[ -z $mpassword ]]
-			then
-				mysql  -h${mip} -u${musername}  -P${mp}  <<EOF
-show databases;
-EOF
-			else
-				mysql  -h${mip} -u${musername}  -p${mpassword} -P${mp}  <<EOF
-show databases;
-EOF
-			fi
+			mcmd="mysql  -h${mip} -u${musername} -p${mpassword} -P${mp} -e 'show databases;'"   &&
+			echo $mcmd|sh
 			if  [ $? -ne 0 ]
 			then
 				echo  $mcmd

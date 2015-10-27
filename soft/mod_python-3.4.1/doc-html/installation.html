@@ -1,0 +1,395 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installation &mdash; Mod_python v3.4.1-3.4.1 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '3.4.1-3.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/sidebar.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="copyright" title="Copyright" href="copyright.html" />
+    <link rel="top" title="Mod_python v3.4.1-3.4.1 documentation" href="index.html" />
+    <link rel="next" title="Tutorial" href="tutorial.html" />
+    <link rel="prev" title="Introduction" href="introduction.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorial"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="introduction.html" title="Introduction"
+             accesskey="P">previous</a> |</li>
+        <li><a href="contents.html">Mod_python v3.4.1-3.4.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="installation">
+<span id="id1"></span><h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">By far the best place to get help with installation and other issues
+is the mod_python mailing list. Please take a moment to join the
+mod_python mailing list by sending an e-mail with the word
+&#8220;subscribe&#8221; in the subject to <a class="reference external" href="mailto:mod_python-request&#37;&#52;&#48;modpython&#46;org">mod_python-request<span>&#64;</span>modpython<span>&#46;</span>org</a> or visit the
+<a class="reference external" href="http://mailman.modpython.org/mailman/listinfo/mod_python">mod_python mailing list page</a></p>
+</div>
+<div class="section" id="prerequisites">
+<span id="inst-prerequisites"></span><h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>
+<p>In the ideal case your Operating System provides a pre-packaged
+version of mod_python. If not, you will need to compile it
+yourself. This version of mod_python requires:</p>
+<ul class="simple">
+<li>Python 2.6 or 2.7. (earlier versions might work too).</li>
+<li>Apache 2.2 or later. Apache 2.4 is highly recommended over 2.2.</li>
+</ul>
+<p>In order to compile mod_python you will need to have the include files
+for both Apache and Python, as well as the Python library installed on
+your system.  If you installed Python and Apache from source, then you
+already have everything needed. However, if you are using pre-packaged
+software then you may need to install the &#8220;development&#8221; packages
+which contain the include files and libraries necessary to compile
+mod_python. Please check your OS documentation for specifics. (Hint:
+look for packages named python-devel or python-dev and apache-devel or
+apache-dev or httpd-dev, etc.).</p>
+</div>
+<div class="section" id="compiling">
+<span id="inst-compiling"></span><h2>Compiling<a class="headerlink" href="#compiling" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="running-configure">
+<span id="inst-configure"></span><h3>Running <tt class="file docutils literal"><span class="pre">./configure</span></tt><a class="headerlink" href="#running-configure" title="Permalink to this headline">¶</a></h3>
+<p>The <tt class="file docutils literal"><span class="pre">./configure</span></tt> script will analyze your environment and
+create custom Makefiles particular to your system. Aside from all the
+standard autoconf stuff, <tt class="file docutils literal"><span class="pre">./configure</span></tt> does the following:</p>
+<ul id="index-0">
+<li><p class="first">Finds out whether a program called <strong class="program">apxs</strong> is available. This
+program is part of the standard Apache distribution, and is required
+for compilation.</p>
+<p>You can manually specify the location of apxs by using the
+<em class="xref std std-option">with-apxs</em> option, e.g.:</p>
+<div class="highlight-python"><pre>$ ./configure --with-apxs=/usr/local/apache/bin/apxs</pre>
+</div>
+<p>It is recommended that you specify this option.</p>
+</li>
+</ul>
+<ul id="index-1">
+<li><p class="first">Checks your Python version and attempts to figure out where
+<tt class="file docutils literal"><span class="pre">libpython</span></tt> is by looking at various parameters compiled into
+your Python binary. By default, it will use the <strong class="program">python</strong>
+program found in your <span class="target" id="index-2"></span><tt class="xref std std-envvar docutils literal"><span class="pre">PATH</span></tt>.</p>
+<p>If the first Python binary in the path is not suitable or not the one
+desired for mod_python, you can specify an alternative location with the
+<em class="xref std std-option">with-python</em> option, e.g.:</p>
+<div class="highlight-python"><pre>$ ./configure --with-python=/usr/local/bin/python2.3</pre>
+</div>
+</li>
+</ul>
+<ul id="index-3">
+<li><p class="first">Sets the directory for the apache mutex locks (if the mutex
+mechanism chosen by APR requires one).</p>
+<p>Note: mutex locks are used only by <a class="reference internal" href="pythonapi.html#pyapi-sess"><em>mod_python Sessions</em></a> and
+<a class="reference internal" href="handlers.html#hand-psp"><em>PSP</em></a> (which maintains a Session implicitly). If you&#8217;re
+not using mod_python Sessions or PSP, then this setting should not
+matter.</p>
+<p>Default is <tt class="file docutils literal"><span class="pre">/tmp</span></tt>. The directory must exist and be
+writable by the owner of the apache process.</p>
+<p>Use <em class="xref std std-option">with-mutex-dir</em> option, e.g:</p>
+<div class="highlight-python"><pre>$ ./configure --with-mutex-dir=/var/run/mod_python</pre>
+</div>
+<p>The mutex directory can also be specified at run time using
+<a class="reference internal" href="directives.html#dir-other-po"><em>PythonOption</em></a> <tt class="docutils literal"><span class="pre">mod_python.mutex_directory</span></tt>.
+See <a class="reference internal" href="#inst-apacheconfig"><em>Configuring Apache</em></a>.</p>
+<p><em>New in version 3.3.0</em></p>
+</li>
+</ul>
+<ul id="index-4">
+<li><p class="first">Sets the maximum number of mutex locks reserved by mod_python.</p>
+<p>Note: mutex locks are used only by <a class="reference internal" href="pythonapi.html#pyapi-sess"><em>mod_python Sessions</em></a> and
+<a class="reference internal" href="handlers.html#hand-psp"><em>PSP</em></a> (which maintains a Session implicitly). If you&#8217;re
+not using mod_python Sessions or PSP, then this setting should not
+matter.</p>
+<p>The mutexes used for locking are a limited resource on some
+systems. Increasing the maximum number of locks may increase performance
+when using session locking.  The default is 8. A reasonable number for
+higher performance would be 32.
+Use <em class="xref std std-option">with-max-locks</em> option, e.g:</p>
+<div class="highlight-python"><pre>$ ./configure --with-max-locks=32</pre>
+</div>
+<p>The number of locks can also be specified at run time using
+<a class="reference internal" href="directives.html#dir-other-po"><em>PythonOption</em></a> <tt class="docutils literal"><span class="pre">mod_python.mutex_locks</span></tt>.
+See <a class="reference internal" href="#inst-apacheconfig"><em>Configuring Apache</em></a>.</p>
+<p><em>New in version 3.2.0</em></p>
+</li>
+</ul>
+<ul id="index-5">
+<li><p class="first">Attempts to locate <strong class="program">flex</strong> and determine its version.
+If <strong class="program">flex</strong> cannot be found in your <span class="target" id="index-6"></span><tt class="xref std std-envvar docutils literal"><span class="pre">PATH</span></tt> <strong class="program">configure</strong>
+will fail.  If the wrong version is found <strong class="program">configure</strong> will generate a warning.
+You can generally ignore this warning unless you need to re-create
+<tt class="file docutils literal"><span class="pre">src/psp_parser.c</span></tt>.</p>
+<p>The parser used by psp (See <a class="reference internal" href="pythonapi.html#pyapi-psp"><em>psp &#8211; Python Server Pager</em></a>) is written in C
+generated using <strong class="program">flex</strong>. (This requires a reentrant version
+of <strong class="program">flex</strong>, 2.5.31 or later).</p>
+<p>If the first flex binary in the path is not suitable or not the one desired
+you can specify an alternative location with the option:with-flex:
+option, e.g:</p>
+<div class="highlight-python"><pre>$ ./configure --with-flex=/usr/local/bin/flex</pre>
+</div>
+<p><em>New in version 3.2.0</em></p>
+</li>
+</ul>
+</div>
+<div class="section" id="running-make">
+<span id="inst-make"></span><h3>Running <tt class="file docutils literal"><span class="pre">make</span></tt><a class="headerlink" href="#running-make" title="Permalink to this headline">¶</a></h3>
+<ul id="index-7">
+<li><p class="first">To start the build process, simply run:</p>
+<div class="highlight-python"><pre>$ make</pre>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="installing">
+<span id="inst-installing"></span><h2>Installing<a class="headerlink" href="#installing" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="inst-makeinstall"></span><p id="index-8">Running <tt class="file docutils literal"><span class="pre">make</span> <span class="pre">install</span></tt></p>
+<ul>
+<li><p class="first">This part of the installation in most cases needs to be done as root:</p>
+<div class="highlight-python"><pre>$ sudo make install</pre>
+</div>
+<ul class="simple">
+<li>This will copy the mod_python library (<tt class="file docutils literal"><span class="pre">mod_python.so</span></tt>) into your Apache
+<tt class="file docutils literal"><span class="pre">libexec</span></tt> or <tt class="file docutils literal"><span class="pre">modules</span></tt> directory, where all the other modules are.</li>
+<li>Lastly, it will install the Python libraries in
+<tt class="file docutils literal"><span class="pre">site-packages</span></tt> and compile them.</li>
+</ul>
+</li>
+</ul>
+<div class="admonition note" id="index-9">
+<p class="first admonition-title">Note</p>
+<p class="last">If you wish to selectively install just the Python libraries
+or the DSO (mod_python.so) (which may not always require superuser
+privileges), you can use the following <strong class="program">make</strong> targets:
+<em class="xref std std-option">install_py_lib</em> and <em class="xref std std-option">install_dso</em>.</p>
+</div>
+</div>
+<div class="section" id="configuring-apache">
+<span id="inst-apacheconfig"></span><h2>Configuring Apache<a class="headerlink" href="#configuring-apache" title="Permalink to this headline">¶</a></h2>
+<ul id="index-10">
+<li><p class="first"><em>LoadModule</em></p>
+<p>You need to configure Apache to load the module by adding the
+following line in the Apache configuration file, usually called
+<tt class="file docutils literal"><span class="pre">httpd.conf</span></tt> or <tt class="file docutils literal"><span class="pre">apache.conf</span></tt>:</p>
+<div class="highlight-python"><pre>LoadModule python_module libexec/mod_python.so</pre>
+</div>
+<p>The actual path to <strong class="program">mod_python.so</strong> may vary, but <strong class="program">make install</strong>
+should report at the very end exactly where <strong class="program">mod_python.so</strong>
+was placed and how the <tt class="docutils literal"><span class="pre">LoadModule</span></tt> directive should appear.</p>
+</li>
+<li><p class="first">See <a class="reference internal" href="#inst-testing"><em>Testing</em></a> below for more basic configuration parameters.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="testing">
+<span id="inst-testing"></span><h2>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p class="first">Make a directory that would be visible on your web site, e.g. <tt class="docutils literal"><span class="pre">htdocs/test</span></tt>.</p>
+</li>
+<li><p class="first">Add the following configuration directives to the main server config file:</p>
+<div class="highlight-python"><pre>&lt;Directory /some/directory/htdocs/test&gt;
+    AddHandler mod_python .py
+    PythonHandler mptest
+    PythonDebug On
+&lt;/Directory&gt;</pre>
+</div>
+<p>(Substitute <tt class="docutils literal"><span class="pre">/some/directory</span></tt> above for something applicable to
+your system, usually your Apache ServerRoot)</p>
+<p>This configuration can also be specified in an <tt class="file docutils literal"><span class="pre">.htaccess</span></tt>
+file.  Note that <tt class="file docutils literal"><span class="pre">.htaccess</span></tt> configuration is typically
+disabled by default, to enable it in a directory specify
+<tt class="docutils literal"><span class="pre">AllowOverride</span></tt> with at least <tt class="docutils literal"><span class="pre">FileInfo</span></tt>.</p>
+</li>
+<li><p class="first">This causes all requests for URLs ending in <tt class="docutils literal"><span class="pre">.py</span></tt> to be processed
+by mod_python. Upon being handed a request, mod_python looks for
+the appropriate <em>python handler</em> to handle it. Here, there is a
+single <tt class="docutils literal"><span class="pre">PythonHandler</span></tt> directive defining module <tt class="docutils literal"><span class="pre">mptest</span></tt> as
+the python handler to use. We&#8217;ll see next how this python handler
+is defined.</p>
+</li>
+<li><p class="first">At this time, if you made changes to the main configuration file,
+you will need to restart Apache in order for the changes to take
+effect.</p>
+</li>
+<li><p class="first">Edit <tt class="file docutils literal"><span class="pre">mptest.py</span></tt> file in the <tt class="file docutils literal"><span class="pre">htdocs/test</span></tt> directory so
+that is has the following lines (be careful when cutting and
+pasting from your browser, you may end up with incorrect
+indentation and a syntax error):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">mod_python</span> <span class="kn">import</span> <span class="n">apache</span>
+
+<span class="k">def</span> <span class="nf">handler</span><span class="p">(</span><span class="n">req</span><span class="p">):</span>
+    <span class="n">req</span><span class="o">.</span><span class="n">content_type</span> <span class="o">=</span> <span class="s">&#39;text/plain&#39;</span>
+    <span class="n">req</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Hello World!&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">apache</span><span class="o">.</span><span class="n">OK</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Point your browser to the URL referring to the <tt class="file docutils literal"><span class="pre">mptest.py</span></tt>;
+you should see <tt class="docutils literal"><span class="pre">'Hello</span> <span class="pre">World!'</span></tt>. If you didn&#8217;t - refer to the
+troubleshooting section next.</p>
+</li>
+<li><p class="first">Note that according to the configuration written above, you can
+point your browser to <em>any</em> URL ending in .py in the test
+directory.  Therefore pointing your browser to
+<tt class="file docutils literal"><span class="pre">/test/foobar.py</span></tt> will be handled exactly the same way by
+<tt class="file docutils literal"><span class="pre">mptest.py</span></tt>. This is because the code in the <tt class="docutils literal"><span class="pre">handler</span></tt>
+function does not bother examining the URL and always acts the same
+way no matter what the URL is.</p>
+</li>
+<li><p class="first">If everything worked well, move on to Chapter <a class="reference internal" href="tutorial.html#tutorial"><em>Tutorial</em></a>.</p>
+</li>
+</ol>
+</div>
+<div class="section" id="troubleshooting">
+<span id="inst-trouble"></span><h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h2>
+<p>There are a few things you can try to identify the problem:</p>
+<ul>
+<li><p class="first">Carefully study the error output, if any.</p>
+</li>
+<li><p class="first">Check the server error log file, it may contain useful clues.</p>
+</li>
+<li><p class="first">Try running Apache from the command line in single process mode:</p>
+<div class="highlight-python"><pre>./httpd -X</pre>
+</div>
+<p>This prevents it from backgrounding itself and may provide some useful
+information.</p>
+</li>
+<li><p class="first">Beginning with mod_python 3.2.0, you can use the mod_python.testhandler
+to diagnose your configuration. Add this to your <tt class="file docutils literal"><span class="pre">httpd.conf</span></tt> file:</p>
+<div class="highlight-python"><pre>&lt;Location /mpinfo&gt;
+  SetHandler mod_python
+  PythonHandler mod_python.testhandler
+&lt;/Location&gt;</pre>
+</div>
+<p>Now point your browser to the <tt class="file docutils literal"><span class="pre">/mpinfo</span></tt> URL
+(e.g. <tt class="file docutils literal"><span class="pre">http://localhost/mpinfo</span></tt>) and note down the information given.
+This will help you reporting your problem to the mod_python list.</p>
+</li>
+<li><p class="first">Ask on the <a class="reference external" href="http://mailman.modpython.org/mailman/listinfo/mod_python">mod_python list</a>.
+Please make sure to provide specifics such as:</p>
+<ul class="simple">
+<li>mod_python version.</li>
+<li>Your operating system type, name and version.</li>
+<li>Your Python version, and any unusual compilation options.</li>
+<li>Your Apache version.</li>
+<li>Relevant parts of the Apache config, .htaccess.</li>
+<li>Relevant parts of the Python code.</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="contents.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Installation</a><ul>
+<li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li><a class="reference internal" href="#compiling">Compiling</a><ul>
+<li><a class="reference internal" href="#running-configure">Running <tt class="file docutils literal"><span class="pre">./configure</span></tt></a></li>
+<li><a class="reference internal" href="#running-make">Running <tt class="file docutils literal"><span class="pre">make</span></tt></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#installing">Installing</a></li>
+<li><a class="reference internal" href="#configuring-apache">Configuring Apache</a></li>
+<li><a class="reference internal" href="#testing">Testing</a></li>
+<li><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="introduction.html"
+                        title="previous chapter">Introduction</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="tutorial.html"
+                        title="next chapter">Tutorial</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/installation.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorial"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="introduction.html" title="Introduction"
+             >previous</a> |</li>
+        <li><a href="contents.html">Mod_python v3.4.1-3.4.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; <a href="copyright.html">Copyright</a> 1990-2013, Apache Software Foundation, Gregory Trubetskoy.
+      Last updated on Oct 22, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

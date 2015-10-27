@@ -1,0 +1,57 @@
+; Ice Shard
+;	- Win 9x/NT Cursor Scheme installation file.
+
+[Version]
+signature="$CHICAGO$"
+
+[DefaultInstall]
+CopyFiles = Scheme.Cur, Scheme.Txt
+AddReg    = Scheme.Reg
+
+[DestinationDirs]
+Scheme.Cur = 10,"%CUR_DIR%"
+Scheme.Txt = 10,"%CUR_DIR%"
+
+[Scheme.Reg]
+HKCU,"Control Panel\Cursors\Schemes","%SCHEME_NAME%",,"%10%\%CUR_DIR%\%Norm_cur%,%10%\%CUR_DIR%\%Help_cur%,%10%\%CUR_DIR%\%Work_cur%,%10%\%CUR_DIR%\%Busy_cur%,%10%\%CUR_DIR%\%Prcs_cur%,%10%\%CUR_DIR%\%Text_cur%,%10%\%CUR_DIR%\%Hand_cur%,%10%\%CUR_DIR%\%Unav_cur%,%10%\%CUR_DIR%\%Vert_cur%,%10%\%CUR_DIR%\%Horz_cur%,%10%\%CUR_DIR%\%Dgn1_cur%,%10%\%CUR_DIR%\%Dgn2_cur%,%10%\%CUR_DIR%\%Move_cur%,%10%\%CUR_DIR%\%Altr_cur%,%10%\%CUR_DIR%\%Link_cur%"
+
+; -- Common Information
+
+[Scheme.Cur]
+Altr_Ice.cur
+Busy_Ice.ani
+Dgn1_Ice.cur
+Dgn2_Ice.cur
+Hand_Ice.cur
+Help_Ice.ani
+Horz_Ice.cur
+Link_Ice.ani
+Move_Ice.cur
+Norm_Ice.cur
+Prcs_Ice.ani
+Text_Ice.ani
+Unav_Ice.ani
+Vert_Ice.cur
+Work_Ice.ani
+
+[Scheme.Txt]
+IceShard.txt
+
+[Strings]
+CUR_DIR     = "Cursors\IceShard"
+SCHEME_NAME = "Ice Shard"
+altr_cur    = "Altr_Ice.cur"
+busy_cur    = "Busy_Ice.ani"
+dgn1_cur    = "Dgn1_Ice.cur"
+dgn2_cur    = "Dgn2_Ice.cur"
+hand_cur    = "Hand_Ice.cur"
+help_cur    = "Help_Ice.ani"
+horz_cur    = "Horz_Ice.cur"
+link_cur    = "Link_Ice.ani"
+move_cur    = "Move_Ice.cur"
+norm_cur    = "Norm_Ice.cur"
+prcs_cur    = "Prcs_Ice.ani"
+text_cur    = "Text_Ice.ani"
+unav_cur    = "Unav_Ice.ani"
+vert_cur    = "Vert_Ice.cur"
+work_cur    = "Work_Ice.ani"

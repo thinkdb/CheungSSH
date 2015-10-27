@@ -1,0 +1,12 @@
+#coding:utf-8
+from django.http import  HttpResponse
+import json
+def auth_check(func):
+	def login_auth_check(request, *args, **kwargs):
+		info={"msgtype":"login"}
+		if request.user.is_authenticated():
+			return func(request,*args,**kwargs)
+		else:
+			info=json.dumps(info)
+			return HttpResponse(info)
+	return login_auth_check

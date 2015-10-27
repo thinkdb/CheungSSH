@@ -1,0 +1,39 @@
+   ____________________________________________
+    V A N A D I U M   -   Cursor Pack
+   ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+   SCHEME INFO:
+
+           Name: Vanadium
+     Resolution: 256 Colors
+
+
+   INSTALATION:
+
+   To use these cursors, you must unzip the
+   VanadiumCur.zip file into it's own
+   directory.
+
+   If you would like to further install the       
+   scheme for ease of use, you can run the        
+   'Vanadium.inf' installation by right-
+   clicking on the file and selecting Install.
+   This will copy the cursors to the
+   \CURSORS\VANADIUM directory under your
+   system directory and install the scheme in
+   the registry. Next, go to the Control Panel
+   (found under Settings in the Start Menu)
+   and doubleclick on the "Mouse" icon.  Once
+   that's opened, click on the "Pointers" tab.
+   From there you should be able to select
+   the Vanadium scheme.  Enjoy!   
+
+
+   CONTACT INFO:
+
+       E-Mail: vmoya@entic.net
+     HomePage: http://www.entic.net/~vmoya/
+
+   ____________________________________________
+                   Copyright, Valery Moya 2001
+   ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯

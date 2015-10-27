@@ -1,0 +1,19 @@
+<div style="height: 100%;" ng-scrollbar scrollbar-x="false" scrollbar-y="true" scrollbar-config="{autoResize:true,show:true}">
+    <div class="col-sm-12" style="padding:0 0;">
+        <div ui-grid="scheduleList" ui-grid-resize-columns ui-grid-move-columns style="padding: 0 0;"></div>
+    </div>
+    <div class="col-sm-12 input-group text-right" style="padding-top:15px;">
+        <button class="btn btn-primary"
+                ng-click="toCommand();">
+            命令
+        </button>&nbsp;&nbsp;
+        <button class="btn btn-primary"
+                ng-click="toUpload();">
+            上传
+        </button>&nbsp;&nbsp;
+        <button class="btn btn-primary"
+                ng-click="toDownload();">
+            下载
+        </button>&nbsp;&nbsp;
+    </div>
+</div>

@@ -1,0 +1,87 @@
+<div ng-controller="scheduleSetupCtr" class="clearfix">
+    <div class="form-group col-sm-12">
+        <div class="col-sm-4">
+            <select name="option1" class="form-control" ng-model="scheduleForm.minute.type"
+                    ng-change="optionMinuteChange()" ng-options="item.id as item.value for item in optionMinute">
+            </select>
+        </div>
+        <div class="col-sm-4">
+            <select name="option2" class="form-control" ng-model="scheduleForm.minute.beginVal"
+                    ng-options="item.id as item.value for item in optionMinuteRangeBegin">
+            </select>
+        </div>
+        <div class="col-sm-4 distance" ng-show="hideMinuteRange">
+            <select name="option2" class="form-control" ng-model="scheduleForm.minute.endVal"
+                    ng-options="item.id as item.value for item in optionMinuteRangeEnd">
+            </select>
+        </div>
+    </div>
+    <div class="form-group col-sm-12">
+        <div class="col-sm-4">
+            <select name="option1" class="form-control" ng-model="scheduleForm.hour.type"
+                    ng-change="optionHourChange()" ng-options="item.id as item.value for item in optionHour">
+            </select>
+        </div>
+        <div class="col-sm-4">
+            <select name="option2" class="form-control" ng-model="scheduleForm.hour.beginVal"
+                    ng-options="item.id as item.value for item in optionHourRangeBegin">
+            </select>
+        </div>
+        <div class="col-sm-4 distance" ng-show="hideHourRange">
+            <select name="option2" class="form-control" ng-model="scheduleForm.hour.endVal"
+                    ng-options="item.id as item.value for item in optionHourRangeEnd">
+            </select>
+        </div>
+    </div>
+    <div class="form-group col-sm-12">
+        <div class="col-sm-4">
+            <select name="option1" class="form-control" ng-model="scheduleForm.day.type"
+                    ng-change="optionDayChange()" ng-options="item.id as item.value for item in optionDay">
+            </select>
+        </div>
+        <div class="col-sm-4">
+            <select name="option2" class="form-control" ng-model="scheduleForm.day.beginVal"
+                    ng-options="item.id as item.value for item in optionDayRangeBegin">
+            </select>
+        </div>
+        <div class="col-sm-4 distance" ng-show="hideDayRange">
+            <select name="option2" class="form-control" ng-model="scheduleForm.day.endVal"
+                    ng-options="item.id as item.value for item in optionDayRangeEnd">
+            </select>
+        </div>
+    </div>
+    <div class="form-group col-sm-12">
+        <div class="col-sm-4">
+            <select name="option1" class="form-control" ng-model="scheduleForm.month.type"
+                    ng-change="optionMonthChange()" ng-options="item.id as item.value for item in optionMonth">
+            </select>
+        </div>
+        <div class="col-sm-4">
+            <select name="option2" class="form-control" ng-model="scheduleForm.month.beginVal"
+                    ng-options="item.id as item.value for item in optionMonthRangeBegin">
+            </select>
+        </div>
+        <div class="col-sm-4 distance" ng-show="hideMonthRange">
+            <select name="option2" class="form-control" ng-model="scheduleForm.month.endVal"
+                    ng-options="item.id as item.value for item in optionMonthRangeEnd">
+            </select>
+        </div>
+    </div>
+    <div class="form-group col-sm-12">
+        <div class="col-sm-4">
+            <select name="option1" class="form-control" ng-model="scheduleForm.week.type"
+                    ng-change="optionWeekChange()" ng-options="item.id as item.value for item in optionWeek">
+            </select>
+        </div>
+        <div class="col-sm-4">
+            <select name="option2" class="form-control" ng-model="scheduleForm.week.beginVal"
+                    ng-options="item.id as item.value for item in optionWeekRangeBegin">
+            </select>
+        </div>
+        <div class="col-sm-4 distance" ng-show="hideWeekRange">
+            <select name="option2" class="form-control" ng-model="scheduleForm.week.endVal"
+                    ng-options="item.id as item.value for item in optionWeekRangeEnd">
+            </select>
+        </div>
+    </div>
+</div>

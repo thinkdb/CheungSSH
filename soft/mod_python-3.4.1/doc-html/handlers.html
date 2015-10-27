@@ -1,0 +1,510 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Standard Handlers &mdash; Mod_python v3.4.1-3.4.1 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '3.4.1-3.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/sidebar.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="copyright" title="Copyright" href="copyright.html" />
+    <link rel="top" title="Mod_python v3.4.1-3.4.1 documentation" href="index.html" />
+    <link rel="next" title="Command Line Tool - mod_python" href="commandline.html" />
+    <link rel="prev" title="Apache Configuration Directives" href="directives.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="commandline.html" title="Command Line Tool - mod_python"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="directives.html" title="Apache Configuration Directives"
+             accesskey="P">previous</a> |</li>
+        <li><a href="contents.html">Mod_python v3.4.1-3.4.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="standard-handlers">
+<span id="handlers"></span><h1>Standard Handlers<a class="headerlink" href="#standard-handlers" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="publisher-handler">
+<span id="hand-pub"></span><h2>Publisher Handler<a class="headerlink" href="#publisher-handler" title="Permalink to this headline">¶</a></h2>
+<p id="index-0">The <tt class="docutils literal"><span class="pre">publisher</span></tt> handler is a good way to avoid writing your own
+handlers and focus on rapid application development. It was inspired
+by <a class="reference external" href="http://www.zope.org/">Zope</a> ZPublisher.</p>
+<div class="section" id="introduction">
+<span id="hand-pub-intro"></span><h3>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h3>
+<p>To use the handler, you need the following lines in your configuration::</p>
+<div class="highlight-python"><pre>&lt;Directory /some/path&gt;
+  SetHandler mod_python
+  PythonHandler mod_python.publisher
+&lt;/Directory&gt;</pre>
+</div>
+<p>This handler allows access to functions and variables within a module
+via URL&#8217;s. For example, if you have the following module, called
+<tt class="file docutils literal"><span class="pre">hello.py</span></tt>::</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot; Publisher example &quot;&quot;&quot;</span>
+
+<span class="k">def</span> <span class="nf">say</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">what</span><span class="o">=</span><span class="s">&quot;NOTHING&quot;</span><span class="p">):</span>
+   <span class="k">return</span> <span class="s">&quot;I am saying </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">what</span>
+</pre></div>
+</div>
+<p>A URL <tt class="docutils literal"><span class="pre">http://www.mysite.com/hello.py/say</span></tt> would return
+<tt class="docutils literal"><span class="pre">'I</span> <span class="pre">am</span> <span class="pre">saying</span> <span class="pre">NOTHING</span></tt>. A URL
+<tt class="docutils literal"><span class="pre">http://www.mysite.com/hello.py/say?what=hello</span></tt> would
+return <tt class="docutils literal"><span class="pre">'I</span> <span class="pre">am</span> <span class="pre">saying</span> <span class="pre">hello</span></tt>.</p>
+</div>
+<div class="section" id="the-publishing-algorithm">
+<span id="hand-pub-alg"></span><h3>The Publishing Algorithm<a class="headerlink" href="#the-publishing-algorithm" title="Permalink to this headline">¶</a></h3>
+<p>The Publisher handler maps a URI directly to a Python variable or
+callable object, then, respectively, returns it&#8217;s string
+representation or calls it returning the string representation of the
+return value.</p>
+<div class="section" id="traversal">
+<span id="hand-pub-alg-trav"></span><span id="index-1"></span><h4>Traversal<a class="headerlink" href="#traversal" title="Permalink to this headline">¶</a></h4>
+<p>The Publisher handler locates and imports the module specified in the
+URI. The module location is determined from the <tt class="xref py py-attr docutils literal"><span class="pre">request.filename</span></tt>
+attribute. Before importing, the file extension, if any, is
+discarded.</p>
+<p>If <tt class="xref py py-attr docutils literal"><span class="pre">request.filename</span></tt> is empty, the module name defaults to
+<tt class="docutils literal"><span class="pre">'index'</span></tt>.</p>
+<p>Once module is imported, the remaining part of the URI up to the
+beginning of any query data (a.k.a. <tt class="xref py py-const docutils literal"><span class="pre">PATH_INFO</span></tt>) is used to find an
+object within the module. The Publisher handler <em>traverses</em> the
+path, one element at a time from left to right, mapping the elements
+to Python object within the module.</p>
+<p>If no <tt class="docutils literal"><span class="pre">path_info</span></tt> was given in the URL, the Publisher handler will use
+the default value of <tt class="docutils literal"><span class="pre">'index'</span></tt>. If the last element is an object inside
+a module, and the one immediately preceding it is a directory
+(i.e. no module name is given), then the module name will also default
+to <tt class="docutils literal"><span class="pre">'index'</span></tt>.</p>
+<p>The traversal will stop and <tt class="xref py py-const docutils literal"><span class="pre">HTTP_NOT_FOUND</span></tt> will be returned to
+the client if:</p>
+<ul class="simple">
+<li>Any of the traversed object&#8217;s names begin with an underscore
+(<tt class="docutils literal"><span class="pre">'_'</span></tt>). Use underscores to protect objects that should not be
+accessible from the web.</li>
+<li>A module is encountered. Published objects cannot be modules for
+security reasons.</li>
+</ul>
+<p>If an object in the path could not be found, <tt class="xref py py-const docutils literal"><span class="pre">HTTP_NOT_FOUND</span></tt>
+is returned to the client.</p>
+<p>For example, given the following configuration::</p>
+<div class="highlight-python"><pre>DocumentRoot /some/dir
+
+&lt;Directory /some/dir&gt;
+  SetHandler mod_python
+  PythonHandler mod_python.publisher
+&lt;/Directory&gt;</pre>
+</div>
+<p>And the following <tt class="file docutils literal"><span class="pre">/some/dir/index.py</span></tt> file::</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">req</span><span class="p">):</span>
+   <span class="k">return</span> <span class="s">&quot;We are in index()&quot;</span>
+
+<span class="k">def</span> <span class="nf">hello</span><span class="p">(</span><span class="n">req</span><span class="p">):</span>
+   <span class="k">return</span> <span class="s">&quot;We are in hello()&quot;</span>
+</pre></div>
+</div>
+<p>Then:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://www.somehost/index/index">http://www.somehost/index/index</a> will return <tt class="docutils literal"><span class="pre">'We</span> <span class="pre">are</span> <span class="pre">in</span> <span class="pre">index()'</span></tt></li>
+<li><a class="reference external" href="http://www.somehost/index/">http://www.somehost/index/</a> will return <tt class="docutils literal"><span class="pre">'We</span> <span class="pre">are</span> <span class="pre">in</span> <span class="pre">index()'</span></tt></li>
+<li><a class="reference external" href="http://www.somehost/index/hello">http://www.somehost/index/hello</a> will return <tt class="docutils literal"><span class="pre">'We</span> <span class="pre">are</span> <span class="pre">in</span> <span class="pre">hello()'</span></tt></li>
+<li><a class="reference external" href="http://www.somehost/hello">http://www.somehost/hello</a> will return <tt class="docutils literal"><span class="pre">'We</span> <span class="pre">are</span> <span class="pre">in</span> <span class="pre">hello()'</span></tt></li>
+<li><a class="reference external" href="http://www.somehost/spam">http://www.somehost/spam</a> will return <tt class="docutils literal"><span class="pre">'404</span> <span class="pre">Not</span> <span class="pre">Found'</span></tt></li>
+</ul>
+</div>
+<div class="section" id="argument-matching-and-invocation">
+<span id="hand-pub-alg-args"></span><h4>Argument Matching and Invocation<a class="headerlink" href="#argument-matching-and-invocation" title="Permalink to this headline">¶</a></h4>
+<p>Once the destination object is found, if it is callable and not a
+class, the Publisher handler will get a list of arguments that the
+object expects. This list is compared with names of fields from HTML
+form data submitted by the client via <tt class="docutils literal"><span class="pre">POST</span></tt> or
+<tt class="docutils literal"><span class="pre">GET</span></tt>. Values of fields whose names match the names of callable
+object arguments will be passed as strings. Any fields whose names do
+not match the names of callable argument objects will be silently dropped,
+unless the destination callable object has a <tt class="docutils literal"><span class="pre">**kwargs</span></tt> style
+argument, in which case fields with unmatched names will be passed in the
+<tt class="docutils literal"><span class="pre">**kwargs</span></tt> argument.</p>
+<p>If the destination is not callable or is a class, then its string
+representation is returned to the client.</p>
+</div>
+<div class="section" id="authentication">
+<span id="hand-pub-alg-auth"></span><span id="index-2"></span><h4>Authentication<a class="headerlink" href="#authentication" title="Permalink to this headline">¶</a></h4>
+<p>The publisher handler provides simple ways to control access to
+modules and functions.</p>
+<p>At every traversal step, the Publisher handler checks for presence of
+<tt class="docutils literal"><span class="pre">__auth__</span></tt> and <tt class="docutils literal"><span class="pre">__access__</span></tt> attributes (in this order), as
+well as <tt class="docutils literal"><span class="pre">__auth_realm__</span></tt> attribute.</p>
+<p>If <tt class="docutils literal"><span class="pre">__auth__</span></tt> is found and it is callable, it will be called
+with three arguments: the <tt class="docutils literal"><span class="pre">request</span></tt> object, a string containing
+the user name and a string containing the password. If the return
+value of
+<tt class="docutils literal"><span class="pre">__auth__</span></tt> is false, then <tt class="xref py py-const docutils literal"><span class="pre">HTTP_UNAUTHORIZED</span></tt> is
+returned to the client (which will usually cause a password dialog box
+to appear).</p>
+<p>If <tt class="xref py py-meth docutils literal"><span class="pre">__auth__()</span></tt> is a dictionary, then the user name will be
+matched against the key and the password against the value associated
+with this key. If the key and password do not match,
+<tt class="xref py py-const docutils literal"><span class="pre">HTTP_UNAUTHORIZED</span></tt> is returned. Note that this requires
+storing passwords as clear text in source code, which is not very secure.</p>
+<p><tt class="docutils literal"><span class="pre">__auth__</span></tt> can also be a constant. In this case, if it is false
+(i.e. <tt class="xref docutils literal"><span class="pre">None</span></tt>, <tt class="docutils literal"><span class="pre">0</span></tt>, <tt class="docutils literal"><span class="pre">&quot;&quot;</span></tt>, etc.), then
+<tt class="xref py py-const docutils literal"><span class="pre">HTTP_UNAUTHORIZED</span></tt> is returned.</p>
+<p>If there exists an <tt class="docutils literal"><span class="pre">__auth_realm__</span></tt> string, it will be sent
+to the client as Authorization Realm (this is the text that usually
+appears at the top of the password dialog box).</p>
+<p>If <tt class="docutils literal"><span class="pre">__access__</span></tt> is found and it is callable, it will be called
+with two arguments: the <tt class="docutils literal"><span class="pre">request</span></tt> object and a string containing
+the user name. If the return value of <tt class="docutils literal"><span class="pre">__access__</span></tt> is false, then
+<tt class="xref py py-const docutils literal"><span class="pre">HTTP_FORBIDDEN</span></tt> is returned to the client.</p>
+<p>If <tt class="docutils literal"><span class="pre">__access__</span></tt> is a list, then the user name will be matched
+against the list elements. If the user name is not in the list,
+<tt class="xref py py-const docutils literal"><span class="pre">HTTP_FORBIDDEN</span></tt> is returned.</p>
+<p>Similarly to <tt class="docutils literal"><span class="pre">__auth__</span></tt>, <tt class="docutils literal"><span class="pre">__access__</span></tt> can be a constant.</p>
+<p>In the example below, only user <tt class="docutils literal"><span class="pre">'eggs'</span></tt> with password <tt class="docutils literal"><span class="pre">'spam'</span></tt>
+can access the <tt class="docutils literal"><span class="pre">hello</span></tt> function::</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">__auth_realm__</span> <span class="o">=</span> <span class="s">&quot;Members only&quot;</span>
+
+<span class="k">def</span> <span class="nf">__auth__</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">passwd</span><span class="p">):</span>
+
+   <span class="k">if</span> <span class="n">user</span> <span class="o">==</span> <span class="s">&quot;eggs&quot;</span> <span class="ow">and</span> <span class="n">passwd</span> <span class="o">==</span> <span class="s">&quot;spam&quot;</span> <span class="ow">or</span> \
+      <span class="n">user</span> <span class="o">==</span> <span class="s">&quot;joe&quot;</span> <span class="ow">and</span> <span class="n">passwd</span> <span class="o">==</span> <span class="s">&quot;eoj&quot;</span><span class="p">:</span>
+      <span class="k">return</span> <span class="mi">1</span>
+   <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="mi">0</span>
+
+<span class="k">def</span> <span class="nf">__access__</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">user</span><span class="p">):</span>
+   <span class="k">if</span> <span class="n">user</span> <span class="o">==</span> <span class="s">&quot;eggs&quot;</span><span class="p">:</span>
+      <span class="k">return</span> <span class="mi">1</span>
+   <span class="k">else</span><span class="p">:</span>
+       <span class="k">return</span> <span class="mi">0</span>
+
+<span class="k">def</span> <span class="nf">hello</span><span class="p">(</span><span class="n">req</span><span class="p">):</span>
+   <span class="k">return</span> <span class="s">&quot;hello&quot;</span>
+</pre></div>
+</div>
+<p>Here is the same functionality, but using an alternative technique::</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">__auth_realm__</span> <span class="o">=</span> <span class="s">&quot;Members only&quot;</span>
+<span class="n">__auth__</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;eggs&quot;</span><span class="p">:</span><span class="s">&quot;spam&quot;</span><span class="p">,</span> <span class="s">&quot;joe&quot;</span><span class="p">:</span><span class="s">&quot;eoj&quot;</span><span class="p">}</span>
+<span class="n">__access__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;eggs&quot;</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">hello</span><span class="p">(</span><span class="n">req</span><span class="p">):</span>
+   <span class="k">return</span> <span class="s">&quot;hello&quot;</span>
+</pre></div>
+</div>
+<p>Since functions cannot be assigned attributes, to protect a function,
+an <tt class="docutils literal"><span class="pre">__auth__</span></tt> or <tt class="docutils literal"><span class="pre">__access__</span></tt> function can be defined within
+the function, e.g.::</p>
+<div class="highlight-python"><pre>def sensitive(req):
+
+   def __auth__(req, user, password):
+      if user == 'spam' and password == 'eggs':
+         # let them in
+         return 1
+      else:
+         # no access
+         return 0
+
+   # something involving sensitive information
+   return 'sensitive information`</pre>
+</div>
+<p>Note that this technique will also work if <tt class="docutils literal"><span class="pre">__auth__</span></tt> or
+<tt class="docutils literal"><span class="pre">__access__</span></tt> is a constant, but will not work is they are
+a dictionary or a list.</p>
+<p>The <tt class="docutils literal"><span class="pre">__auth__</span></tt> and <tt class="docutils literal"><span class="pre">__access__</span></tt> mechanisms exist
+independently of the standard
+<a class="reference internal" href="directives.html#dir-handlers-auh"><em>PythonAuthenHandler</em></a>. It
+is possible to use, for example, the handler to authenticate, then the
+<tt class="docutils literal"><span class="pre">__access__</span></tt> list to verify that the authenticated user is
+allowed to a particular function.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">In order for mod_python to access <tt class="docutils literal"><span class="pre">__auth__</span></tt>, the module
+containing it must first be imported. Therefore, any module-level
+code will get executed during the import even if
+<tt class="docutils literal"><span class="pre">__auth__</span></tt> is false.  To truly protect a module from being
+accessed, use other authentication mechanisms, e.g. the Apache
+<tt class="docutils literal"><span class="pre">mod_auth</span></tt> or with a mod_python <a class="reference internal" href="directives.html#dir-handlers-auh"><em>PythonAuthenHandler</em></a>.</p>
+</div>
+</div>
+</div>
+<div class="section" id="form-data">
+<span id="hand-pub-form"></span><h3>Form Data<a class="headerlink" href="#form-data" title="Permalink to this headline">¶</a></h3>
+<p>In the process of matching arguments, the Publisher handler creates an
+instance of <a class="reference internal" href="pythonapi.html#pyapi-util-fstor"><em>FieldStorage class</em></a>.
+A reference to this instance is stored in an attribute member{form}
+of the <tt class="docutils literal"><span class="pre">request</span></tt> object.</p>
+<p>Since a <tt class="docutils literal"><span class="pre">FieldStorage</span></tt> can only be instantiated once per
+request, one must not attempt to instantiate <tt class="docutils literal"><span class="pre">FieldStorage</span></tt> when
+using the Publisher handler and should use
+<tt class="xref py py-attr docutils literal"><span class="pre">request.form</span></tt> instead.</p>
+</div>
+</div>
+<div class="section" id="wsgi-handler">
+<span id="hand-wsgi"></span><h2>WSGI Handler<a class="headerlink" href="#wsgi-handler" title="Permalink to this headline">¶</a></h2>
+<p id="index-3">WSGI handler can run WSGI applications as described in <span class="target" id="index-4"></span><a class="pep reference external" href="http://www.python.org/dev/peps/pep-0333"><strong>PEP 333</strong></a>.</p>
+<p>Assuming there exists the following minimal WSGI app residing in a file named
+<tt class="docutils literal"><span class="pre">mysite/wsgi.py</span></tt> in directory <tt class="docutils literal"><span class="pre">/path/to/mysite</span></tt> (so that the full
+path to <tt class="docutils literal"><span class="pre">wsgi.py</span></tt> is <tt class="docutils literal"><span class="pre">/path/to/mysite/mysite/wsgi.py</span></tt>):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">application</span><span class="p">(</span><span class="n">environ</span><span class="p">,</span> <span class="n">start_response</span><span class="p">):</span>
+   <span class="n">status</span> <span class="o">=</span> <span class="s">&#39;200 OK&#39;</span>
+   <span class="n">output</span> <span class="o">=</span> <span class="s">&#39;Hello World!&#39;</span>
+
+   <span class="n">response_headers</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&#39;Content-type&#39;</span><span class="p">,</span> <span class="s">&#39;text/plain&#39;</span><span class="p">),</span>
+                       <span class="p">(</span><span class="s">&#39;Content-Length&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">output</span><span class="p">)))]</span>
+   <span class="n">start_response</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">response_headers</span><span class="p">)</span>
+
+   <span class="k">return</span> <span class="p">[</span><span class="n">output</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>It can be executed using the WSGI handler by adding the following to the
+Apache configuration:</p>
+<div class="highlight-python"><pre>PythonHandler mod_python.wsgi
+PythonOption mod_python.wsgi.application mysite.wsgi
+PythonPath "sys.path+['/path/to/mysite']"</pre>
+</div>
+<p>The above configuration will import a module named <tt class="docutils literal"><span class="pre">mysite.wsgi</span></tt> and
+will look for an <tt class="docutils literal"><span class="pre">application</span></tt> callable in the module.</p>
+<p>An alternative name for the callable can be specified by appending it
+to the module name separated by <tt class="docutils literal"><span class="pre">'::'</span></tt>, e.g.:</p>
+<div class="highlight-python"><pre>PythonOption mod_python.wsgi.application mysite.wsgi::my_application</pre>
+</div>
+<p>If you would like your application to appear under a base URI, it can
+be specified by wrapping your configuration in a <tt class="docutils literal"><span class="pre">&lt;Location&gt;</span></tt>
+block. It can also be specified via the <tt class="docutils literal"><span class="pre">mod_python.wsgi.base_uri</span></tt>
+option, but the <tt class="docutils literal"><span class="pre">&lt;Location&gt;</span></tt> method is recommended, also because it
+has a side-benefit of informing mod_python to skip the map-to-storage
+processing phase and thereby improving performance.</p>
+<p>For example, if you would like the above application to appear under
+<tt class="docutils literal"><span class="pre">'/wsgiapps'</span></tt>, you could specify:</p>
+<div class="highlight-python"><pre>&lt;Location /wsgiapps&gt;
+   PythonHandler mod_python.wsgi
+   PythonOption mod_python.wsgi.application mysite.wsgi
+   PythonPath "sys.path+['/path/to/mysite']"
+&lt;/Location&gt;</pre>
+</div>
+<p>With the above configuration, content formerly under
+<tt class="docutils literal"><span class="pre">http://example.com/hello</span></tt> becomes available under
+<tt class="docutils literal"><span class="pre">http://example.com/wsgiapps/hello</span></tt>.</p>
+<p>If both <tt class="docutils literal"><span class="pre">&lt;Location&gt;</span></tt> and <tt class="docutils literal"><span class="pre">mod_python.wsgi.base_uri</span></tt> exist, then
+<tt class="docutils literal"><span class="pre">mod_python.wsgi.base_uri</span></tt> takes precedence.
+<tt class="docutils literal"><span class="pre">mod_python.wsgi.base_uri</span></tt> cannot be <tt class="docutils literal"><span class="pre">'/'</span></tt> or end with a
+<tt class="docutils literal"><span class="pre">'/'</span></tt>. &#8220;Root&#8221; (or no base_uri) is a blank string, which is the
+default. (Note that it is allowed for <tt class="docutils literal"><span class="pre">&lt;Location&gt;</span></tt> path to be
+<tt class="docutils literal"><span class="pre">&quot;/&quot;</span></tt> or have a trailing slash, it will automatically be removed by
+mod_python before computing <tt class="docutils literal"><span class="pre">PATH_INFO</span></tt>).</p>
+<div class="admonition note" id="index-5">
+<p class="first admonition-title">Note</p>
+<p><span class="target" id="index-6"></span><a class="pep reference external" href="http://www.python.org/dev/peps/pep-0333"><strong>PEP 333</strong></a> describes <tt class="docutils literal"><span class="pre">SCRIPT_NAME</span></tt> and <tt class="docutils literal"><span class="pre">PATH_INFO</span></tt> environment
+variables which are core to the specification. Most WSGI-supporting
+frameworks currently in existence use the value of <tt class="docutils literal"><span class="pre">PATH_INFO</span></tt> as the
+request URI.</p>
+<p>The two variable&#8217;s name and function originate in CGI
+(<span class="target" id="index-7"></span><a class="rfc reference external" href="http://tools.ietf.org/html/rfc3875.html"><strong>RFC 3875</strong></a>), which describes an environment wherein a script (or
+any executable&#8217;s) output could be passed on by the web server as
+content. A typical CGI script resides somewhere on the filesystem
+to which the request URI maps. As part of serving the request the
+server traverses the URI mapping each element to an element of the
+filesystem path to locate the script. Once the script is found, the
+portion of the URI used thus far is assigned to the <tt class="docutils literal"><span class="pre">SCRIPT_NAME</span></tt>
+variable, while the remainder of the URI gets assigned to
+<tt class="docutils literal"><span class="pre">PATH_INFO</span></tt>.</p>
+<p>Because the relationship between Python modules and files on disk
+is largely tangential, it is not very clear what exactly
+<tt class="docutils literal"><span class="pre">PATH_INFO</span></tt> and <tt class="docutils literal"><span class="pre">SCRIPT_NAME</span></tt> ought to be. Even though Python
+modules are most often files on disk located somewhere in the
+Python path, they don&#8217;t have to be (they could be code objects
+constructed on-the-fly), and their location in the filesystem has
+no relationship to the URL structure at all.</p>
+<p>The mismatch between CGI and WSGI results in an ambiguity which
+requires that the split between the two variables be explicitely
+specified, which is why <tt class="docutils literal"><span class="pre">mod_python.wsgi.base_uri</span></tt> exists. In essence
+<tt class="docutils literal"><span class="pre">mod_python.wsgi.base_uri</span></tt> (or the path in surrounding
+<tt class="docutils literal"><span class="pre">&lt;Location&gt;</span></tt>) is the <tt class="docutils literal"><span class="pre">SCRIPT_NAME</span></tt> portion of the URI and
+defaults to <tt class="docutils literal"><span class="pre">''</span></tt>.</p>
+<p class="last">An important detail is that <tt class="docutils literal"><span class="pre">SCRIPT_NAME</span></tt> + <tt class="docutils literal"><span class="pre">PATH_INFO</span></tt> should
+result in the original URI (encoding issues aside). Since
+<tt class="docutils literal"><span class="pre">SCRIPT_NAME</span></tt> (in its original CGI definition) referrs to an
+actual file, its name never ends with a slash. The slash, if any,
+always ends up in <tt class="docutils literal"><span class="pre">PATH_INFO</span></tt>. E.g. <tt class="docutils literal"><span class="pre">/path/to/myscrip/foo/bar</span></tt>
+splits into <tt class="docutils literal"><span class="pre">/path/to/myscript</span></tt> and <tt class="docutils literal"><span class="pre">/foo/bar</span></tt>. If the whole
+site is served by an app or a script, then <tt class="docutils literal"><span class="pre">SCRIPT_NAME</span></tt> is a
+blank string <tt class="docutils literal"><span class="pre">''</span></tt>, not a <tt class="docutils literal"><span class="pre">'/'</span></tt>.</p>
+</div>
+</div>
+<div class="section" id="psp-handler">
+<span id="hand-psp"></span><h2>PSP Handler<a class="headerlink" href="#psp-handler" title="Permalink to this headline">¶</a></h2>
+<p id="index-8">PSP handler is a handler that processes documents using the
+<tt class="docutils literal"><span class="pre">PSP</span></tt> class in <tt class="docutils literal"><span class="pre">mod_python.psp</span></tt> module.</p>
+<p>To use it, simply add this to your httpd configuration:</p>
+<div class="highlight-python"><pre>AddHandler mod_python .psp
+PythonHandler mod_python.psp</pre>
+</div>
+<p>For more details on the PSP syntax, see Section <a class="reference internal" href="pythonapi.html#pyapi-psp"><em>psp &#8211; Python Server Pager</em></a>.</p>
+<p>If <tt class="docutils literal"><span class="pre">PythonDebug</span></tt> server configuration is <tt class="docutils literal"><span class="pre">On</span></tt>, then by
+appending an underscore (<tt class="docutils literal"><span class="pre">'_'</span></tt>) to the end of the url you can get a
+nice side-by-side listing of original PSP code and resulting Python
+code generated by the <tt class="docutils literal"><span class="pre">psp}</span> <span class="pre">module</span></tt>. This is very useful for
+debugging. You&#8217;ll need to adjust your httpd configuration::</p>
+<div class="highlight-python"><pre>AddHandler mod_python .psp .psp_
+PythonHandler mod_python.psp
+PythonDebug On</pre>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Leaving debug on in a production environment will allow remote users
+to display source code of your PSP pages!</p>
+</div>
+</div>
+<div class="section" id="cgi-handler">
+<span id="hand-cgi"></span><h2>CGI Handler<a class="headerlink" href="#cgi-handler" title="Permalink to this headline">¶</a></h2>
+<p id="index-9">CGI handler is a handler that emulates the CGI environment under mod_python.</p>
+<p>Note that this is not a <tt class="docutils literal"><span class="pre">'true'</span></tt> CGI environment in that it is
+emulated at the Python level. <tt class="docutils literal"><span class="pre">stdin</span></tt> and <tt class="docutils literal"><span class="pre">stdout</span></tt> are
+provided by substituting <tt class="docutils literal"><span class="pre">sys.stdin</span></tt> and <tt class="docutils literal"><span class="pre">sys.stdout</span></tt>, and
+the environment is replaced by a dictionary. The implication is that
+any outside programs called from within this environment via
+<tt class="docutils literal"><span class="pre">os.system</span></tt>, etc. will not see the environment available to the
+Python program, nor will they be able to read/write from standard
+input/output with the results expected in a <tt class="docutils literal"><span class="pre">'true'</span></tt> CGI environment.</p>
+<p>The handler is provided as a stepping stone for the migration of
+legacy code away from CGI. It is not recommended that you settle on
+using this handler as the preferred way to use mod_python for the long
+term. This is because the CGI environment was not intended for
+execution within threads (e.g. requires changing of current directory
+with is inherently not thread-safe, so to overcome this cgihandler
+maintains a thread lock which forces it to process one request at a
+time in a multi-threaded server) and therefore can only be implemented
+in a way that defeats many of the advantages of using mod_python in
+the first place.</p>
+<p>To use it, simply add this to your <tt class="file docutils literal"><span class="pre">.htaccess</span></tt> file::</p>
+<div class="highlight-python"><pre>SetHandler mod_python
+PythonHandler mod_python.cgihandler</pre>
+</div>
+<p>As of version 2.7, the cgihandler will properly reload even indirectly
+imported module. This is done by saving a list of loaded modules
+(sys.modules) prior to executing a CGI script, and then comparing it
+with a list of imported modules after the CGI script is done.  Modules
+(except for whose whose __file__ attribute points to the standard
+Python library location) will be deleted from sys.modules thereby
+forcing Python to load them again next time the CGI script imports
+them.</p>
+<p>If you do not want the above behavior, edit the <tt class="file docutils literal"><span class="pre">cgihandler.py</span></tt>
+file and comment out the code delimited by ###.</p>
+<p>Tests show the cgihandler leaking some memory when processing a lot of
+file uploads. It is still not clear what causes this. The way to work
+around this is to set the Apache <tt class="docutils literal"><span class="pre">MaxRequestsPerChild</span></tt> to a non-zero
+value.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="contents.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Standard Handlers</a><ul>
+<li><a class="reference internal" href="#publisher-handler">Publisher Handler</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#the-publishing-algorithm">The Publishing Algorithm</a><ul>
+<li><a class="reference internal" href="#traversal">Traversal</a></li>
+<li><a class="reference internal" href="#argument-matching-and-invocation">Argument Matching and Invocation</a></li>
+<li><a class="reference internal" href="#authentication">Authentication</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#form-data">Form Data</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#wsgi-handler">WSGI Handler</a></li>
+<li><a class="reference internal" href="#psp-handler">PSP Handler</a></li>
+<li><a class="reference internal" href="#cgi-handler">CGI Handler</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="directives.html"
+                        title="previous chapter">Apache Configuration Directives</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="commandline.html"
+                        title="next chapter">Command Line Tool - mod_python</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/handlers.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="commandline.html" title="Command Line Tool - mod_python"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="directives.html" title="Apache Configuration Directives"
+             >previous</a> |</li>
+        <li><a href="contents.html">Mod_python v3.4.1-3.4.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; <a href="copyright.html">Copyright</a> 1990-2013, Apache Software Foundation, Gregory Trubetskoy.
+      Last updated on Oct 22, 2013.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

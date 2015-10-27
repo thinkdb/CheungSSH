@@ -14,7 +14,7 @@ from base64 import b64encode, b64decode
 import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
-
+socket.setdefaulttimeout(10900000000000)
 connectionlist = {}
 g_code_length = 0
 g_header_length = 0
@@ -84,8 +84,8 @@ def parse_data(msg,ie_key):
 	print "命令格式错误",e
 	sys.exit(1)
 	
-    cheungssh_web.main(raw_str,ie_key,selectserver)
-    return raw_str
+    print "已经不再接收浏览器的输入"
+    return False
 
 
 def sendMessage(message):
@@ -156,7 +156,8 @@ def sendMessage(message):
 								source_message_dict_tmp=eval(source_message_dict_tmp)
 							source_message_dict_tmp["content"][0]["servers"][0]["info"]=b
 							if i==info_length:
-								source_message_dict_tmp["id"]=source_message_dict["id"]+"Done"
+								#source_message_dict_tmp["id"]=source_message_dict["id"]+"Done"
+								source_message_dict_tmp["id"]=source_message_dict["id"]
 						except Exception,e:
 							print "转换错了",e
 						source_message_dict_tmp=str(json.dumps(source_message_dict_tmp,encoding='utf-8'))
@@ -174,7 +175,8 @@ def sendMessage(message):
        			    		connectionlist[connection].send(back_str)
 				break
 			else:
-				connectionlist[connection].send('\x81'+chr(len('Done'))+'Done')
+				pass
+				#connectionlist[connection].send('\x81'+chr(len('Done'))+'Done')
 		elif ie_key=="all":
            		connectionlist[connection].send(back_str)
 		else:
@@ -257,14 +259,11 @@ class WebSocket(threading.Thread):#继承Thread
                     #sendMessage(u'Welcome, ' + self.name + ' !')  #像浏览器发送消息
                     #sendMessage(unicode("欢迎使用CheungSSH Web版本! QQ:2418731289").encode('utf-8'))  #像浏览器发送消息
                     #os.system("python %s/cheung/bin/get_info.py"%HOME)
-                    import get_info
-                    first_info="""{"%s":%s}"""%(self.ie_key,get_info.get_info())
                     #print first_info,555555555555
-                    sendMessage(first_info)
                     #sendMessage(unicode("""<script type="text/javascript">alert("欢迎使用CheungSSH Web版本! QQ:2418731289")</script>""").encode('utf-8'))  #像浏览器发送消息
                     i=1
                     #print self.buffer_utf8
-                    #sendMessage('开始接收...')  #像浏览器发送消息
+                    sendMessage("""{"%s":{"content": [{"servers": [{"info": "%s"}]}], "msgtype": "token", "id": "%s"}}"""  % (self.ie_key,self.ie_key,self.ie_key))  #像浏览器发送消息
                     self.buffer_utf8 = ""
                     g_code_length = 0                    
 		else:
@@ -334,16 +333,16 @@ class WebSocketServer(object):
         global connectionlist
 
 
-        i=0
         while True:
+            i=str(random.randint(90000000000000000000,99999999999999999999))
             connection, address = self.socket.accept()
+            print '客户端ip',address
             username=address[0]     
-            ie_key='connection'+str(i)
+            ie_key='connection'+i
             path="/"
             newSocket = WebSocket(connection,i,username,address,path,ie_key)
             newSocket.start() #开始线程,执行run函数
             connectionlist[ie_key]=connection
-            i = i + 1
 
 
 if __name__ == "__main__":

@@ -1,0 +1,42 @@
+  ____________________________________________
+   H A N D Y   D A N D Y   -   Cursor Pack
+  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+   SCHEME INFO
+   -----------
+
+     Scheme Name: Handy Dandy
+      Resolution: 256 Colors
+
+
+   INSTALATION
+   -----------
+
+     To use these cursors, you must unzip the
+    HandyDandy256Cur.zip file into it's own
+    directory.
+
+     If you would like to further install the
+    scheme for ease of use, you can run the
+    HandyDandy.inf by right-clicking on the
+    file and selecting Install.  This will
+    copy the cursors to the \CURSORS\HndyDndy
+    directory under your system directory and
+    install the Scheme in the registry.
+    Next, go to the Control Panel (found
+    under Settings in the Start Menu) and
+    doubleclick on the 'Mouse' icon.  Once
+    that's opened, click on the 'Pointers
+    tab.  From there you should be able to
+    select the Handy Dandy scheme.  Enjoy!
+
+
+   CONTACT INFO
+   ------------
+
+       E-Mail: vmoya@entic.net
+     HomePage: http://www.entic.net/~vmoya/
+
+  ____________________________________________
+                  Copyright, Valery Moya 2000
+  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯

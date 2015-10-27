@@ -1,0 +1,46 @@
+<div tabindex="-1" ui-tree-handle ng-id="" class="tree-node tree-node-content list-group-item masget-focusActive" data-nodrag="{{node.isGroup||options.showCheckbox?true:false}}"
+     ng-click="triggerClick(node,$event,!collapsed);">
+    <span class="indent" ng-if="node.level>1" repeat-times="{{node.level-1}}">&nbsp;&nbsp;&nbsp;</span>
+    <span ng-if="node.isGroup" data-nodrag ng-click="toggleCollapseState(this,$event);"
+          class="glyphicon"
+          ng-class="{
+          'glyphicon-triangle-bottom':!collapsed,
+          'glyphicon-triangle-right':collapsed
+        }">
+    </span>
+    <span data-nodrag
+          ng-class="{
+          'glyphicon glyphicon-user': node.isLeaf,
+          'icon icon-group':node.isGroup
+        }"></span>
+    {{node.addressgroupname||node.contactname}}&nbsp;&nbsp;&nbsp;
+    <span style="color: red;" ng-if="!options.showCheckbox">{{node.platformuser==2?'非平台用户':''}}</span>
+    <span ng-if="node.tag&&node.isLeaf" style="color: red;" ng-bind-html="node.tag"></span>
+    <span ng-if="options.showCheckbox&&node.isLeaf" ng-class="{
+          'icon-check-empty':!node.selected,
+          'icon-check':node.selected
+        }" class="icon masget-treeCheck" ng-click="toggleSelectedState($event,node)"></span>
+    <a tabindex="1" style="text-decoration: none;" ng-if="options.showRightButtons&&node.isGroup" ng-hide="node.level ==1&&node.scenetypeid == 1" class="glyphicon glyphicon-menu-hamburger masget-rightButtons" data-html="true"
+       data-content-Template="{{node.isCompany?'popover/company.rightMenu.tpl.html':node.isStation?'popover/station.rightMenu.tpl.html':node.scenetypeid == 1&&node.level == 1?'popover/organization.rightMenu.tpl.html':'popover/contacts.rightMenu.tpl.html'}}"
+       data-delay="200" data-container="body" data-trigger="focus" bs-popover></a>
+</div>
+<div ui-tree-nodes ng-model="node.nodes" style="margin-bottom: 0px;" ng-hide="collapsed" style="max-height: 300px;overflow: auto;" ng-if="node.level == 1">
+    <div ng-repeat="node in node.nodes" ui-tree-node ng-include="'base/app/common/treeView/nodes_render.html'" class="repeat"
+         collapsed="true">
+    </div>
+    <div ng-if="node.scenetypeid == 1" ng-click="loadMoreData(node);" ng-show="node.nodes.length>=options.pageSize&&!node.loadedAll" class="list-group-item" style="text-align: center;cursor:pointer;height:30px;background-color: antiquewhite;padding-top: 4px;">
+        <div class="loader"  ng-class="{
+    'load1': node.isLoading,
+    '':!node.isLoading,
+    }" >&nbsp;&nbsp;{{node.isLoading?'加载中...':'点击加载更多'}}</div></div>
+</div>
+<div ui-tree-nodes ng-model="node.nodes" style="margin-bottom: 0px;" ng-hide="collapsed" ng-if="node.level > 1">
+    <div ng-repeat="node in node.nodes" ui-tree-node ng-include="'base/app/common/treeView/nodes_render.html'" class="repeat"
+         collapsed="true">
+    </div>
+    <div ng-click="loadMoreData(node);" ng-show="node.nodes.length>=options.pageSize&&!node.loadedAll" class="list-group-item" style="text-align: center;cursor:pointer;height:30px;background-color: antiquewhite;padding-top: 4px;">
+        <div class="loader"  ng-class="{
+    'load1': node.isLoading,
+    '':!node.isLoading,
+    }" >&nbsp;&nbsp;{{node.isLoading?'加载中...':'点击加载更多'}}</div></div>
+</div>

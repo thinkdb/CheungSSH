@@ -1,0 +1,57 @@
+; Gear
+;	- Win 9x/NT Cursor Scheme installation file.
+
+[Version]
+signature="$CHICAGO$"
+
+[DefaultInstall]
+CopyFiles = Scheme.Cur, Scheme.Txt
+AddReg    = Scheme.Reg
+
+[DestinationDirs]
+Scheme.Cur = 10,"%CUR_DIR%"
+Scheme.Txt = 10,"%CUR_DIR%"
+
+[Scheme.Reg]
+HKCU,"Control Panel\Cursors\Schemes","%SCHEME_NAME%",,"%10%\%CUR_DIR%\%Norm_cur%,%10%\%CUR_DIR%\%Help_cur%,%10%\%CUR_DIR%\%Work_cur%,%10%\%CUR_DIR%\%Busy_cur%,%10%\%CUR_DIR%\%Prcs_cur%,%10%\%CUR_DIR%\%Text_cur%,%10%\%CUR_DIR%\%Hand_cur%,%10%\%CUR_DIR%\%Unav_cur%,%10%\%CUR_DIR%\%Vert_cur%,%10%\%CUR_DIR%\%Horz_cur%,%10%\%CUR_DIR%\%Dgn1_cur%,%10%\%CUR_DIR%\%Dgn2_cur%,%10%\%CUR_DIR%\%Move_cur%,%10%\%CUR_DIR%\%Altr_cur%,%10%\%CUR_DIR%\%Link_cur%"
+
+; -- Common Information
+
+[Scheme.Cur]
+Altr_Gea.cur
+Busy_Gea.ani
+Dgn1_Gea.ani
+Dgn2_Gea.ani
+Hand_Gea.cur
+Help_Gea.cur
+Horz_Gea.ani
+Link_Gea.ani
+Move_Gea.cur
+Norm_Gea.cur
+Prcs_Gea.cur
+Text_Gea.cur
+Unav_Gea.cur
+Vert_Gea.ani
+Work_Gea.cur
+
+[Scheme.Txt]
+Gear.txt
+
+[Strings]
+CUR_DIR     = "Cursors\Gear"
+SCHEME_NAME = "Gear"
+altr_cur    = "Altr_Gea.cur"
+busy_cur    = "Busy_Gea.ani"
+dgn1_cur    = "Dgn1_Gea.ani"
+dgn2_cur    = "Dgn2_Gea.ani"
+hand_cur    = "Hand_Gea.cur"
+help_cur    = "Help_Gea.cur"
+horz_cur    = "Horz_Gea.ani"
+link_cur    = "Link_Gea.ani"
+move_cur    = "Move_Gea.cur"
+norm_cur    = "Norm_Gea.cur"
+prcs_cur    = "Prcs_Gea.cur"
+text_cur    = "Text_Gea.cur"
+unav_cur    = "Unav_Gea.cur"
+vert_cur    = "Vert_Gea.ani"
+work_cur    = "Work_Gea.cur"

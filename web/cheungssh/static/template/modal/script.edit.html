@@ -1,0 +1,15 @@
+<form name="scriptEditForm" class="clearfix">
+    <textarea style="background-color: #000;color: #ffffff;font-size:14px;" class="col-sm-12" rows="20" ng-model="$parent.$parent.$parent.scriptContent"></textarea>
+    <div class="form-group col-sm-8" style="margin-top:8px;">
+        <input type="text" class="form-control" name="scriptName" placeholder="脚本名称" aria-describedby="basic-addon3" ng-model="$parent.$parent.$parent.scriptName" required>
+        <div style="display: inline-block;position: absolute;font-size: 32px;top:0px;right: 0px;"
+             ng-messages="scriptEditForm.scriptName.$error">
+            <div style="color: red;" ng-message="required">*</div>
+        </div>
+
+    </div>
+    <div style="padding:10px;" class="col-sm-4 text-right">
+        <button class="btn btn-primary" ng-disabled="scriptEditForm.$invalid" ng-click="saveScript();">保存脚本</button>
+        <button class="btn btn-primary" ng-click="$hide();">取消</button>
+    </div>
+</form>

@@ -1,0 +1,57 @@
+; Ice Pick
+;	- Win 9x/NT Cursor Scheme installation file.
+
+[Version]
+signature="$CHICAGO$"
+
+[DefaultInstall]
+CopyFiles = Scheme.Cur, Scheme.Txt
+AddReg    = Scheme.Reg
+
+[DestinationDirs]
+Scheme.Cur = 10,"%CUR_DIR%"
+Scheme.Txt = 10,"%CUR_DIR%"
+
+[Scheme.Reg]
+HKCU,"Control Panel\Cursors\Schemes","%SCHEME_NAME%",,"%10%\%CUR_DIR%\%Norm_cur%,%10%\%CUR_DIR%\%Help_cur%,%10%\%CUR_DIR%\%Work_cur%,%10%\%CUR_DIR%\%Busy_cur%,%10%\%CUR_DIR%\%Prcs_cur%,%10%\%CUR_DIR%\%Text_cur%,%10%\%CUR_DIR%\%Hand_cur%,%10%\%CUR_DIR%\%Unav_cur%,%10%\%CUR_DIR%\%Vert_cur%,%10%\%CUR_DIR%\%Horz_cur%,%10%\%CUR_DIR%\%Dgn1_cur%,%10%\%CUR_DIR%\%Dgn2_cur%,%10%\%CUR_DIR%\%Move_cur%,%10%\%CUR_DIR%\%Altr_cur%,%10%\%CUR_DIR%\%Link_cur%"
+
+; -- Common Information
+
+[Scheme.Cur]
+Altr_IcP.cur
+Busy_IcP.ani
+Dgn1_IcP.cur
+Dgn2_IcP.cur
+Hand_IcP.cur
+Help_IcP.ani
+Horz_IcP.cur
+Link_IcP.ani
+Move_IcP.cur
+Norm_IcP.cur
+Prcs_IcP.ani
+Text_IcP.ani
+Unav_IcP.ani
+Vert_IcP.cur
+Work_IcP.ani
+
+[Scheme.Txt]
+IcePick.txt
+
+[Strings]
+CUR_DIR     = "Cursors\IcePick"
+SCHEME_NAME = "Ice Pick"
+altr_cur    = "Altr_IcP.cur"
+busy_cur    = "Busy_IcP.ani"
+dgn1_cur    = "Dgn1_IcP.cur"
+dgn2_cur    = "Dgn2_IcP.cur"
+hand_cur    = "Hand_IcP.cur"
+help_cur    = "Help_IcP.ani"
+horz_cur    = "Horz_IcP.cur"
+link_cur    = "Link_IcP.ani"
+move_cur    = "Move_IcP.cur"
+norm_cur    = "Norm_IcP.cur"
+prcs_cur    = "Prcs_IcP.ani"
+text_cur    = "Text_IcP.ani"
+unav_cur    = "Unav_IcP.ani"
+vert_cur    = "Vert_IcP.cur"
+work_cur    = "Work_IcP.ani"
