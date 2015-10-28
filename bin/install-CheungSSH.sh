@@ -285,7 +285,7 @@ EOF
 		cd /home/cheungssh/soft &&
 		tar xvf  mod_python-3.4.1.tgz  &&
 		cd  mod_python-3.4.1        &&
-		./configure   --with-paxs=/usr/sbin/apxs    --with-python=/usr/bin/python   &&
+		./configure    --with-apxs=/usr/sbin/apxs    --with-python=/usr/bin/python   &&
 		make && make install
 		if  [ $? -ne 0 ]
 		then
