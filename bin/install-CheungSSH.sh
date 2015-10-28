@@ -9,7 +9,7 @@ then
 	echo "Must be as root install!"
 	exit 1
 fi
-echo  "Installing..."
+echo  "Installing......"
 setenforce 0
 useradd cheungssh -d /home/cheungssh  -s /sbin/nologin #该目录是cheungssh的工作目录， 必须创建
 mkdir -p /home/cheungssh/keyfile
@@ -145,8 +145,8 @@ then
 			echo "安装完毕"
 		fi
 		###
-		tar xvf ../soft/Django-1.4.22.tar.gz -C ../soft
-		python ../soft/Django-1.4.22/setup.py install
+		tar xvf /home/cheungssh/soft/Django-1.4.22.tar.gz -C  /home/cheungssh/soft/
+		cd /home/cheungssh/soft/Django-1.4.22 && python setup.py install
 		if [ $? -ne 0 ]
 		then
 			echo "安装Django失败了，请检查是否有GCC环境"
