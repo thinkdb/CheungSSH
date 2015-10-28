@@ -1,6 +1,5 @@
 #coding:utf-8
 from django.conf.urls import patterns, include, url
-from django.views.decorators.cache import cache_page
 from mysite.cheungssh.cheungssh import cheungssh_index
 #from mysite.cheungssh.cheungssh import test
 import mysite
@@ -25,7 +24,7 @@ urlpatterns = patterns('',
 	url(r'^cheungssh/delkey/$','mysite.cheungssh.cheungssh.delkey'),
 	url(r'^cheungssh/keyadmin/$','mysite.cheungssh.cheungssh.keyshow'),
 	url(r'^cheungssh/local_upload_show/$','mysite.cheungssh.cheungssh.local_upload_show'),
-	url(r'^cheungssh/$',cache_page(cheungssh_index,30*1)),
+	url(r'^cheungssh/$',cheungssh_index),
 	url(r'^cheungssh/hostinfo/$','mysite.cheungssh.hostinfo.hostinfo'),
 	url(r'^cheungssh/translog/$','mysite.cheungssh.hostinfo.translog'),
 	url(r'^cheungssh/groupinfo/$','mysite.cheungssh.hostinfo.groupinfo'),
