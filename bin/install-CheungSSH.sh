@@ -147,7 +147,7 @@ then
 		fi
 		echo  "检查paramiko"
 		cat<<EOFparamiko|python
-import sys
+import sys,os
 try:
 	import paramiko
 except AttributeError:
@@ -323,6 +323,7 @@ EOF
 			echo "修改配置端口完毕"
 		fi
 		########3
+		chown -R  root.cheungssh /etc/httpd/ 2>/dev/null
 		chown -R cheungssh.cheungssh /home/cheungssh
 		if [ $? -ne 0 ]
 		then
