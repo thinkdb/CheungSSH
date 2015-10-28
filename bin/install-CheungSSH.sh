@@ -47,6 +47,7 @@ else
 		echo "复制程序文件完成"
 	fi
 fi
+chmod a+x -R /home/cheungssh/bin/
 echo  "正在复制..."
 cat <<EOFver|python
 #coding:utf-8
@@ -144,6 +145,16 @@ then
 		else
 			echo "安装完毕"
 		fi
+		echo  "检查paramiko"
+		cat<<EOFparamiko|python
+import sys
+try:
+	import paramiko
+except AttributeError:
+	os.system("""sed  -i '/You should rebuild using libgmp/d;/HAVE_DECL_MPZ_POWM_SEC/d'  /usr/lib*/python*/site-packages/Crypto/Util/number.py   /usr/lib*/python*/site-packages/pycrypto*/Crypto/Util/number.py""")
+except:
+        sys.exit(1)
+EOFparamiko
 		###
 		tar xvf /home/cheungssh/soft/Django-1.4.22.tar.gz -C  /home/cheungssh/soft/
 		cd /home/cheungssh/soft/Django-1.4.22 && python setup.py install
@@ -193,6 +204,7 @@ then
 			mip=${mip:-localhost}
 			musername=${musername:-root}
 			mp=${mp:-3306}
+			mcmd="mysql -h${mip} -u${musername}  -p${mpassword} -P${mp}"
 			if [[ -z $mpassword ]]
 			then
 				mysql  -h${mip} -u${musername}  -P${mp}  <<EOF
@@ -203,7 +215,6 @@ EOF
 show databases;
 EOF
 			fi
-			mcmd="mysql -h${mip} -u${musername}  -p${mpassword} -P${mp}"
 			if  [ $? -ne 0 ]
 			then
 				echo  $mcmd
@@ -258,7 +269,7 @@ EOF
 		mysql -uroot -h${mip} -u${musername} -p${mpassword} -P${mp} -e 'create database if not exists cheungssh  default charset utf8'
 		if  [ $? -ne 0 ]
 		then
-			echo "数据库错误,请检查原因"
+			echo "连接数据库错误,请检查原因，端口， 密码， IP是否正确？您是否已经有Mysql服务器？"
 			exit 1
 		fi
 		mysql -uroot -h${mip} -u${musername} -p${mpassword} -P${mp} cheungssh < /home/cheungssh/bin/cheungssh.sql
